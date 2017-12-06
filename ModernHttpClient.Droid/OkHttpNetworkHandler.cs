@@ -38,6 +38,7 @@ namespace ModernHttpClient
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
 
             if (customSSLVerification) client.SetHostnameVerifier(new HostnameVerifier());
+
             noCacheCacheControl = (new CacheControl.Builder()).NoCache().Build();
         }
 
