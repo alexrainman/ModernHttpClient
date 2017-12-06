@@ -1,0 +1,29 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModernHttpClient.Droid", "ModernHttpClient.Droid\ModernHttpClient.Droid.csproj", "{3CA7684C-44CD-4257-A78B-22062897E513}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModernHttpClient.iOS", "ModernHttpClient.iOS\ModernHttpClient.iOS.csproj", "{0C2317DD-F8E8-4555-8866-9AFC325C3A44}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModernHttpClient", "ModernHttpClient\ModernHttpClient.csproj", "{186ADAA4-4702-4D3A-81D1-AAFAFB23F5DA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3CA7684C-44CD-4257-A78B-22062897E513}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CA7684C-44CD-4257-A78B-22062897E513}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CA7684C-44CD-4257-A78B-22062897E513}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CA7684C-44CD-4257-A78B-22062897E513}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C2317DD-F8E8-4555-8866-9AFC325C3A44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C2317DD-F8E8-4555-8866-9AFC325C3A44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C2317DD-F8E8-4555-8866-9AFC325C3A44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C2317DD-F8E8-4555-8866-9AFC325C3A44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{186ADAA4-4702-4D3A-81D1-AAFAFB23F5DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{186ADAA4-4702-4D3A-81D1-AAFAFB23F5DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{186ADAA4-4702-4D3A-81D1-AAFAFB23F5DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{186ADAA4-4702-4D3A-81D1-AAFAFB23F5DA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

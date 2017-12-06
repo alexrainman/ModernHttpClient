@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <version>2.4.3</version>
+    <authors>Paul Betts, Alex Rainman</authors>
+    <owners>Paul Betts, Alex Rainman</owners>
+    <licenseUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/COPYING</licenseUrl>
+    <projectUrl>https://github.com/alexrainman/ModernHttpClient</projectUrl>
+    <id>modernhttpclient-updated</id>
+    <title>ModernHttpClient (Updated)</title>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Write your app using System.Net.Http, but drop this library in and it will go drastically faster.</description>
+    <summary>Write your app using System.Net.Http, but drop this library in and it will go drastically faster.</summary>
+    <copyright>Copyright Paul Betts © 2012</copyright>
+    <releaseNotes>
+2.4.4
+[Android] Updating to OkHttp3
+2.4.3
+[Update] Adding Timeout property
+[Android] Updating to Square.OkHttp 2.7.5
+[Android] Timeout value is not respected on Android #192
+        </releaseNotes>
+    <dependencies>
+      <group targetFramework="MonoAndroid">
+        <dependency id="Square.OkHttp" version="2.7.5" />
+      </group>
+    </dependencies>
+  </metadata>
+
+  <files>
+    <!-- PCL -->
+    <file src="lib/ModernHttpClient.dll" target="lib/portable-net45+netcore45+wpa81+wp8+MonoAndroid10+Xamarin.iOS10/ModernHttpClient.dll" />
+
+    <!-- Xamarin.iOS (Unified)-->
+    <file src="lib/iOS/ModernHttpClient.dll" target="lib/Xamarin.iOS10/ModernHttpClient.dll" />
+
+    <!-- Xamarin.Android -->
+    <file src="lib/Droid/ModernHttpClient.dll" target="lib/MonoAndroid/ModernHttpClient.dll" />
+  </files>
+</package>
