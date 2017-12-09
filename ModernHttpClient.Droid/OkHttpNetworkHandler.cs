@@ -12,6 +12,8 @@ using Java.IO;
 using System.Security.Cryptography.X509Certificates;
 using Android.OS;
 using Java.Util.Concurrent;
+using Java.Security.Cert;
+using Android.App;
 
 namespace ModernHttpClient
 {
@@ -30,8 +32,9 @@ namespace ModernHttpClient
 
         public bool DisableCaching { get; set; }
         public TimeSpan? Timeout { get; set; }
+        public bool EnableUntrustedCertificates { get; set; }
 
-        public NativeMessageHandler() : this(false, false) { }
+        public NativeMessageHandler() : this(false, false) {}
 
         public NativeMessageHandler(bool throwOnCaptiveNetwork, bool customSSLVerification, NativeCookieHandler cookieHandler = null)
         {
@@ -84,6 +87,19 @@ namespace ModernHttpClient
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            // Support self-signed certificates
+            if (EnableUntrustedCertificates)
+            {
+                // Install the all-trusting trust manager
+                var sslContext = SSLContext.GetInstance("SSL");
+                var trustManager = new CustomX509TrustManager();
+                sslContext.Init(null, new ITrustManager[] { trustManager }, new Java.Security.SecureRandom());
+                // Create an ssl socket factory with our all-trusting manager
+                var sslSocketFactory = sslContext.SocketFactory;
+
+                client.SetSslSocketFactory(sslSocketFactory);
+            }
+
             if (Timeout != null)
             {
                 var timeout = (long)Timeout.Value.TotalMilliseconds;
@@ -207,7 +223,9 @@ namespace ModernHttpClient
                 // Kind of a hack, but the simplest way to find out that server cert. validation failed
                 if (p1.Message == String.Format("Hostname '{0}' was not verified", p0.Url().Host))
                 {
-                    tcs.TrySetException(new WebException(p1.LocalizedMessage, WebExceptionStatus.TrustFailure));
+                    // SIGABRT after UnknownHostException #229
+                    tcs.TrySetException(new WebException(p1.Message));
+                    //tcs.TrySetException(new WebException(p1.LocalizedMessage, WebExceptionStatus.TrustFailure));
                 }
                 else
                 {
@@ -243,6 +261,8 @@ namespace ModernHttpClient
         {
             var defaultVerifier = HttpsURLConnection.DefaultHostnameVerifier;
 
+            // Call custom ServicePointManager.ServerCertificateValidationCallback delegate
+            // if customSSLVerification is true
             if (ServicePointManager.ServerCertificateValidationCallback == null) return defaultVerifier.Verify(hostname, session);
 
             // Convert java certificates to .NET certificates and build cert chain from root certificate
@@ -278,9 +298,7 @@ namespace ModernHttpClient
             chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
             chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
 
-#pragma warning disable XS0001 // Find APIs marked as TODO in Mono
             if (!chain.Build(root))
-#pragma warning restore XS0001 // Find APIs marked as TODO in Mono
             {
                 errors = System.Net.Security.SslPolicyErrors.RemoteCertificateChainErrors;
                 goto bail;
@@ -316,6 +334,23 @@ namespace ModernHttpClient
             var acceptedCiphers = callback(protocol, new[] { session.CipherSuite });
 
             return acceptedCiphers.Contains(session.CipherSuite);
+        }
+    }
+
+    class CustomX509TrustManager : Java.Lang.Object, IX509TrustManager
+    {
+        public void CheckClientTrusted(Java.Security.Cert.X509Certificate[] chain, string authType)
+        {
+        }
+
+        public void CheckServerTrusted(Java.Security.Cert.X509Certificate[] chain, string authType)
+        {
+            //throw new Java.Security.Cert.CertificateException();
+        }
+
+        Java.Security.Cert.X509Certificate[] IX509TrustManager.GetAcceptedIssuers()
+        {
+            return new Java.Security.Cert.X509Certificate[0];
         }
     }
 }

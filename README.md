@@ -19,7 +19,7 @@ using ModernHttpClient is the most boring thing in the world.
 Here's how it works:
 
 ```cs
-private static HttpClient httpClient = new HttpClient(new NativeMessageHandler() { Timeout = new TimeSpan(0,0,9), DisableCaching = true, UseCookies = false });
+private static HttpClient httpClient = new HttpClient(new NativeMessageHandler() { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true, DisableCaching = true, UseCookies = false });
 ```
 
 ## How can I use this in a PCL?
@@ -28,6 +28,14 @@ Just reference the Portable version of ModernHttpClient in your Portable
 Library, and it will use the correct version on all platforms.
 
 #### Release Notes
+
+2.4.4
+
+[Android] SIGABRT after UnknownHostException #229
+
+[iOS] Updating obsolete NSUrlSessionDelegate to INSUrlSessionDelegate
+
+[Update] Adding EnableUntrustedCertificates to support self-signed certificates
 
 2.4.3
 

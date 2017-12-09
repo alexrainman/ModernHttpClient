@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <version>2.4.3</version>
+    <version>2.4.4</version>
     <authors>Paul Betts, Alex Rainman</authors>
     <owners>Paul Betts, Alex Rainman</owners>
     <licenseUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/COPYING</licenseUrl>
@@ -13,6 +13,11 @@
     <summary>Write your app using System.Net.Http, but drop this library in and it will go drastically faster.</summary>
     <copyright>Copyright Paul Betts © 2012</copyright>
     <releaseNotes>
+2.4.4
+[Android] SIGABRT after UnknownHostException #229
+[iOS] Updating obsolete NSUrlSessionDelegate to INSUrlSessionDelegate
+[Update] Adding EnableUntrustedCertificates to support self-signed certificates
+
 2.4.3
 [Update] Adding Timeout property
 [Android] Updating to Square.OkHttp 2.7.5

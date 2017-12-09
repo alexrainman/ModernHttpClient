@@ -48,6 +48,8 @@ namespace ModernHttpClient
             set { throw new Exception (wrongVersion); }
         }
 
+        public bool EnableUntrustedCertificates { get; set; }
+
         public void RegisterForProgress(HttpRequestMessage request, ProgressDelegate callback)
         {
             throw new Exception(wrongVersion);
