@@ -22,6 +22,26 @@ Here's how it works:
 private static HttpClient httpClient = new HttpClient(new NativeMessageHandler() { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true, DisableCaching = true, UseCookies = false });
 ```
 
+## Self-signed certificates
+
+A new property named EnableUntrustedCertificates has been added to support self-signed certificates.
+
+To make it work in iOS, add this to your info.plist:
+
+```xml
+<key>NSAppTransportSecurity</key>
+<dict>
+    <key>NSExceptionDomains</key>
+    <dict>
+        <key>self-signed.badssl.com</key>
+        <dict>
+            <key>NSExceptionAllowsInsecureHTTPLoads</key>
+            <true/>
+        </dict>
+    </dict>
+</dict>
+```
+
 ## How can I use this in a PCL?
 
 Just reference the Portable version of ModernHttpClient in your Portable
