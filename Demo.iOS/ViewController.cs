@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net.Http;
 using ModernHttpClient;
 using UIKit;
@@ -19,7 +20,12 @@ namespace Demo.iOS
 
             var client = new HttpClient(new NativeMessageHandler() { EnableUntrustedCertificates = true });
 
+            var timer = new Stopwatch();
+            timer.Start();
+
             var response = await client.GetAsync(new Uri("https://self-signed.badssl.com"));
+
+            timer.Stop();
 
             Console.WriteLine(response);
         }

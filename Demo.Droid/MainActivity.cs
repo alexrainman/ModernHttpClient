@@ -4,6 +4,7 @@ using Android.OS;
 using System.Net.Http;
 using ModernHttpClient;
 using System;
+using System.Diagnostics;
 
 namespace Demo.Droid
 {
@@ -22,11 +23,16 @@ namespace Demo.Droid
         {
             base.OnResume();
 
-            var client = new HttpClient(new NativeMessageHandler() { EnableUntrustedCertificates = true });
+            var client = new HttpClient(new NativeMessageHandler() { EnableUntrustedCertificates = true, Timeout = new TimeSpan(0,0,9) });
+
+            var timer = new Stopwatch();
+            timer.Start();
 
             var response = await client.GetAsync(new Uri("https://self-signed.badssl.com"));
 
-            Console.WriteLine(response);
+            timer.Stop();
+
+            Console.WriteLine(timer.ElapsedMilliseconds);
         }
     }
 }

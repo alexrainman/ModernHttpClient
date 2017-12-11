@@ -5,21 +5,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using Square.OkHttp;
+using Square.OkHttp3;
 using Javax.Net.Ssl;
 using System.Text.RegularExpressions;
 using Java.IO;
 using System.Security.Cryptography.X509Certificates;
-using Android.OS;
 using Java.Util.Concurrent;
-using Java.Security.Cert;
-using Android.App;
 
 namespace ModernHttpClient
 {
     public class NativeMessageHandler : HttpClientHandler
     {
-        readonly OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = new OkHttpClient();
         readonly CacheControl noCacheCacheControl = default(CacheControl);
         readonly bool throwOnCaptiveNetwork;
 
@@ -40,7 +37,14 @@ namespace ModernHttpClient
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
 
-            if (customSSLVerification) client.SetHostnameVerifier(new HostnameVerifier());
+            if (customSSLVerification)
+            {
+                var clientBuilder = client.NewBuilder();
+                clientBuilder.HostnameVerifier((hostname, session) => {
+                    return HostnameVerifier.verifyServerCertificate(hostname, session) & HostnameVerifier.verifyClientCiphers(hostname, session);
+                });
+                client = clientBuilder.Build();
+            }
 
             noCacheCacheControl = (new CacheControl.Builder()).NoCache().Build();
         }
@@ -87,6 +91,8 @@ namespace ModernHttpClient
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            var clientBuilder = client.NewBuilder();
+
             // Support self-signed certificates
             if (EnableUntrustedCertificates)
             {
@@ -97,17 +103,18 @@ namespace ModernHttpClient
                 // Create an ssl socket factory with our all-trusting manager
                 var sslSocketFactory = sslContext.SocketFactory;
 
-                client.SetSslSocketFactory(sslSocketFactory);
+                clientBuilder.SslSocketFactory(sslSocketFactory, trustManager);
             }
 
             if (Timeout != null)
             {
                 var timeout = (long)Timeout.Value.TotalMilliseconds;
-
-                client.SetConnectTimeout(timeout, TimeUnit.Milliseconds);
-                client.SetWriteTimeout(timeout, TimeUnit.Milliseconds);
-                client.SetReadTimeout(timeout, TimeUnit.Milliseconds);
+                clientBuilder.ConnectTimeout(timeout, TimeUnit.Milliseconds);
+                clientBuilder.WriteTimeout(timeout, TimeUnit.Milliseconds);
+                clientBuilder.ReadTimeout(timeout, TimeUnit.Milliseconds);
             }
+
+            client = clientBuilder.Build();
 
             var java_uri = request.RequestUri.GetComponents(UriComponents.AbsoluteUri, UriFormat.UriEscaped);
             var url = new Java.Net.URL(java_uri);
@@ -125,13 +132,13 @@ namespace ModernHttpClient
                 body = RequestBody.Create(MediaType.Parse(contentType), bytes);
             }
 
-            var builder = new Request.Builder()
+            var requestBuilder = new Request.Builder()
                 .Method(request.Method.Method.ToUpperInvariant(), body)
                 .Url(url);
 
             if (DisableCaching)
             {
-                builder.CacheControl(noCacheCacheControl);
+                requestBuilder.CacheControl(noCacheCacheControl);
             }
 
             var keyValuePairs = request.Headers
@@ -139,11 +146,11 @@ namespace ModernHttpClient
                     (IEnumerable<KeyValuePair<string, IEnumerable<string>>>)request.Content.Headers :
                     Enumerable.Empty<KeyValuePair<string, IEnumerable<string>>>());
 
-            foreach (var kvp in keyValuePairs) builder.AddHeader(kvp.Key, String.Join(getHeaderSeparator(kvp.Key), kvp.Value));
+            foreach (var kvp in keyValuePairs) requestBuilder.AddHeader(kvp.Key, String.Join(getHeaderSeparator(kvp.Key), kvp.Value));
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var rq = builder.Build();
+            var rq = requestBuilder.Build();
             var call = client.NewCall(rq);
 
             // NB: Even closing a socket must be done off the UI thread. Cray!
@@ -154,7 +161,7 @@ namespace ModernHttpClient
             {
                 resp = await call.EnqueueAsync().ConfigureAwait(false);
                 var newReq = resp.Request();
-                var newUri = newReq == null ? null : newReq.Uri();
+                var newUri = newReq == null ? null : newReq.Url().Uri();
                 request.RequestUri = new Uri(newUri.ToString());
                 if (throwOnCaptiveNetwork && newUri != null)
                 {
@@ -205,7 +212,7 @@ namespace ModernHttpClient
 
     public static class AwaitableOkHttp
     {
-        public static Task<Response> EnqueueAsync(this Call This)
+        public static Task<Response> EnqueueAsync(this ICall This)
         {
             var cb = new OkTaskCallback();
             This.Enqueue(cb);
@@ -218,10 +225,10 @@ namespace ModernHttpClient
             readonly TaskCompletionSource<Response> tcs = new TaskCompletionSource<Response>();
             public Task<Response> Task { get { return tcs.Task; } }
 
-            public void OnFailure(Request p0, Java.IO.IOException p1)
+            public void OnFailure(ICall p0, IOException p1)
             {
                 // Kind of a hack, but the simplest way to find out that server cert. validation failed
-                if (p1.Message == String.Format("Hostname '{0}' was not verified", p0.Url().Host))
+                if (p1.Message == String.Format("Hostname '{0}' was not verified", p0.Request().Url().Host()))
                 {
                     // SIGABRT after UnknownHostException #229
                     tcs.TrySetException(new WebException(p1.Message));
@@ -233,9 +240,9 @@ namespace ModernHttpClient
                 }
             }
 
-            public void OnResponse(Response p0)
+            public void OnResponse(ICall p0, Response p1)
             {
-                tcs.TrySetResult(p0);
+                tcs.TrySetResult(p1);
             }
         }
     }
@@ -246,7 +253,6 @@ namespace ModernHttpClient
 
         public bool Verify(string hostname, ISSLSession session)
         {
-            // TODO: use non-obsolete API
             return verifyServerCertificate(hostname, session) & verifyClientCiphers(hostname, session);
         }
 
@@ -257,7 +263,7 @@ namespace ModernHttpClient
         /// <returns><c>true</c>, if server certificate was verifyed, <c>false</c> otherwise.</returns>
         /// <param name="hostname"></param>
         /// <param name="session"></param>
-        static bool verifyServerCertificate(string hostname, ISSLSession session)
+        public static bool verifyServerCertificate(string hostname, ISSLSession session)
         {
             var defaultVerifier = HttpsURLConnection.DefaultHostnameVerifier;
 
@@ -325,9 +331,9 @@ namespace ModernHttpClient
         /// <param name="hostname"></param>
         /// <param name="session"></param>
         [Obsolete]
-        static bool verifyClientCiphers(string hostname, ISSLSession session)
+        public static bool verifyClientCiphers(string hostname, ISSLSession session)
         {
-            var callback = ServicePointManager.ClientCipherSuitesCallback;
+            var callback = ServicePointManager.ClientCipherSuitesCallback; // TODO: use non-obsolete API
             if (callback == null) return true;
 
             var protocol = session.Protocol.StartsWith("SSL", StringComparison.InvariantCulture) ? SecurityProtocolType.Ssl3 : SecurityProtocolType.Tls;
@@ -345,7 +351,6 @@ namespace ModernHttpClient
 
         public void CheckServerTrusted(Java.Security.Cert.X509Certificate[] chain, string authType)
         {
-            //throw new Java.Security.Cert.CertificateException();
         }
 
         Java.Security.Cert.X509Certificate[] IX509TrustManager.GetAcceptedIssuers()
