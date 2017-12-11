@@ -49,6 +49,10 @@ Library, and it will use the correct version on all platforms.
 
 #### Release Notes
 
+2.5.0
+
+[Android] Updating to Square.OkHttp3
+
 2.4.4
 
 [Android] SIGABRT after UnknownHostException #229
