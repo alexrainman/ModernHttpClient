@@ -33,7 +33,7 @@ To make it work in iOS, add this to your info.plist:
 <dict>
     <key>NSExceptionDomains</key>
     <dict>
-        <key>self-signed.badssl.com</key>
+        <key>your-self-signed.badssl.com</key>
         <dict>
             <key>NSExceptionAllowsInsecureHTTPLoads</key>
             <true/>
