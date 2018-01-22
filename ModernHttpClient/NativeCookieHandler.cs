@@ -13,6 +13,21 @@ namespace ModernHttpClient
             throw new Exception(wrongVersion);
         }
 
+        public void DeleteCookies()
+        {
+            throw new Exception(wrongVersion);
+        }
+
+        public void SetCookie(Cookie cookie)
+        {
+            throw new Exception(wrongVersion);
+        }
+
+        public void DeleteCookie(Cookie cookie)
+        {
+            throw new Exception(wrongVersion);
+        }
+
         public List<Cookie> Cookies
         {
             get { throw new Exception(wrongVersion); }

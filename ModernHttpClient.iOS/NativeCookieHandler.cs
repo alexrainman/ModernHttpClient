@@ -14,6 +14,25 @@ namespace ModernHttpClient
             }
         }
 
+        public void DeleteCookies()
+        {
+            var CookieStorage = NSHttpCookieStorage.SharedStorage;
+            foreach (var cookie in CookieStorage.Cookies)
+                CookieStorage.DeleteCookie(cookie);
+        }
+
+        public void SetCookie(Cookie cookie)
+        {
+            var nc = ToNativeCookie(cookie);
+            NSHttpCookieStorage.SharedStorage.SetCookie(nc);
+        }
+
+        public void DeleteCookie(Cookie cookie)
+        {
+            var nc = ToNativeCookie(cookie);
+            NSHttpCookieStorage.SharedStorage.DeleteCookie(nc);
+        }
+
         public List<Cookie> Cookies {
             get {
                 return NSHttpCookieStorage.SharedStorage.Cookies

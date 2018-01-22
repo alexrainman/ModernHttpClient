@@ -37,14 +37,20 @@ namespace ModernHttpClient
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
 
+            var clientBuilder = client.NewBuilder();
+
             if (customSSLVerification)
             {
-                var clientBuilder = client.NewBuilder();
                 clientBuilder.HostnameVerifier((hostname, session) => {
                     return HostnameVerifier.verifyServerCertificate(hostname, session) & HostnameVerifier.verifyClientCiphers(hostname, session);
                 });
-                client = clientBuilder.Build();
             }
+
+            if (cookieHandler != null) {
+                clientBuilder.CookieJar(cookieHandler);
+            }
+
+            client = clientBuilder.Build();
 
             noCacheCacheControl = (new CacheControl.Builder()).NoCache().Build();
         }

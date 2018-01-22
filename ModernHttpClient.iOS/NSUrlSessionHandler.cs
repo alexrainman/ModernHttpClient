@@ -85,6 +85,8 @@ namespace ModernHttpClient
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
             this.customSSLVerification = customSSLVerification;
 
+            // NSUrlSessionConfiguration.DefaultSessionConfiguration uses the default NSHttpCookieStorage.SharedStorage
+
             this.DisableCaching = false;
         }
 

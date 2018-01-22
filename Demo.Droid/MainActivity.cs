@@ -5,6 +5,7 @@ using System.Net.Http;
 using ModernHttpClient;
 using System;
 using System.Diagnostics;
+using System.Net;
 
 namespace Demo.Droid
 {
@@ -23,14 +24,23 @@ namespace Demo.Droid
         {
             base.OnResume();
 
-            var client = new HttpClient(new NativeMessageHandler() { EnableUntrustedCertificates = true, Timeout = new TimeSpan(0,0,9) });
+            var cookieHandler = new NativeCookieHandler();
+
+            var client = new HttpClient(new NativeMessageHandler(false, false, cookieHandler) { EnableUntrustedCertificates = true, Timeout = new TimeSpan(0,0,9) });
 
             var timer = new Stopwatch();
             timer.Start();
 
+            // SetCookie before making the call
+            // It will be loaded by OkHttp3.CookieJar.LoadForRequest
+            var cookie = new Cookie("cookie1", "value1", "/", "self-signed.badssl.com");
+            cookieHandler.SetCookie(cookie);
+
             var response = await client.GetAsync(new Uri("https://self-signed.badssl.com"));
 
             timer.Stop();
+
+            cookieHandler.DeleteCookies();
 
             Console.WriteLine(timer.ElapsedMilliseconds);
         }

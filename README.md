@@ -19,7 +19,7 @@ using ModernHttpClient is the most boring thing in the world.
 Here's how it works:
 
 ```cs
-private static HttpClient httpClient = new HttpClient(new NativeMessageHandler() { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true, DisableCaching = true, UseCookies = false });
+private static HttpClient httpClient = new HttpClient(new NativeMessageHandler() { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true, DisableCaching = true });
 ```
 
 ## Self-signed certificates
@@ -47,11 +47,47 @@ To make it work in iOS, add this to your info.plist:
 Just reference the Portable version of ModernHttpClient in your Portable
 Library, and it will use the correct version on all platforms.
 
+## NativeCookieHandler methods
+
+```SetCookies(IEnumerable<Cookie> cookies)```: set native cookies
+
+```DeleteCookies()```: delete all native cookies.
+
+```SetCookie(Cookie cookie)```: set a native cookie.
+
+```DeleteCookie(Cookie cookie)```: delete a native cookie.
+
+### How to use NativeCookieHandler?
+
+SetCookie before making the http call so, it will be loaded by OkHttp3.CookieJar.LoadForRequest
+
+```cs
+var cookieHandler = new NativeCookieHandler();
+private static HttpClient httpClient = new HttpClient(new NativeMessageHandler(false, false, cookieHandler) { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true });
+
+var cookie = new Cookie("cookie1", "value1", "/", "self-signed.badssl.com");
+cookieHandler.SetCookie(cookie);
+
+var response = await client.GetAsync(new Uri("https://self-signed.badssl.com"));
+```
+
 #### Release Notes
+
+2.5.1
+
+[Android] NativeCookieHandler, if provided, is set as the default CookieJar for OkHttpClient
+
+[Update] Adding DeleteCookies, SetCookie and DeleteCookie to NativeCookieHandler
 
 2.5.0
 
 [Android] Updating to Square.OkHttp3
+
+2.4.5
+
+[Android] NativeCookieHandler, if provided, is set as the default cookie handler for OkHttpClient
+
+[Update] Adding DeleteCookies, SetCookie and DeleteCookie to NativeCookieHandler
 
 2.4.4
 
