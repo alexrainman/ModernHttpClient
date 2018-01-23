@@ -11,6 +11,8 @@ using System.Text.RegularExpressions;
 using Java.IO;
 using System.Security.Cryptography.X509Certificates;
 using Java.Util.Concurrent;
+using Java.Net;
+using System.Text;
 
 namespace ModernHttpClient
 {
@@ -151,12 +153,41 @@ namespace ModernHttpClient
                 .Union(request.Content != null ?
                     (IEnumerable<KeyValuePair<string, IEnumerable<string>>>)request.Content.Headers :
                     Enumerable.Empty<KeyValuePair<string, IEnumerable<string>>>());
+            
+            // Add Cookie Header if there's any cookie for the domain in the cookie jar
+            var stringBuilder = new StringBuilder();
 
-            foreach (var kvp in keyValuePairs) requestBuilder.AddHeader(kvp.Key, String.Join(getHeaderSeparator(kvp.Key), kvp.Value));
+            if (client.CookieJar() != null)
+            {
+                var jar = client.CookieJar();
+                var cookies = jar.LoadForRequest(HttpUrl.Get(url));
+                foreach (var cookie in cookies)
+                {
+                    stringBuilder.Append(cookie.Name() + "=" + cookie.Value() + ";");
+                }
+            }
+
+            //foreach (var kvp in keyValuePairs) requestBuilder.AddHeader(kvp.Key, String.Join(getHeaderSeparator(kvp.Key), kvp.Value));
+                
+            foreach (var kvp in keyValuePairs)
+            {
+                if (kvp.Key == "Cookie")
+                {
+                    foreach (var val in kvp.Value)
+                        stringBuilder.Append(val + ";");
+                }
+                else
+                {
+                    requestBuilder.AddHeader(kvp.Key, String.Join(getHeaderSeparator(kvp.Key), kvp.Value));
+                }
+            }
+
+            requestBuilder.AddHeader("Cookie", stringBuilder.ToString().TrimEnd(';'));
 
             cancellationToken.ThrowIfCancellationRequested();
 
             var rq = requestBuilder.Build();
+            //var headers = rq.Headers();
             var call = client.NewCall(rq);
 
             // NB: Even closing a socket must be done off the UI thread. Cray!

@@ -32,9 +32,11 @@ namespace Demo.Droid
             timer.Start();
 
             // SetCookie before making the call
-            // It will be loaded by OkHttp3.CookieJar.LoadForRequest
+            // It will be loaded by OkHttp3.CookieJar.LoadForRequest and merged into the Cookie header in the native request
             var cookie = new Cookie("cookie1", "value1", "/", "self-signed.badssl.com");
             cookieHandler.SetCookie(cookie);
+
+            client.DefaultRequestHeaders.Add("Cookie", "cookie2=value2");
 
             var response = await client.GetAsync(new Uri("https://self-signed.badssl.com"));
 

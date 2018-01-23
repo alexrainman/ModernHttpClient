@@ -14,6 +14,7 @@ using ModernHttpClient.Foundation;
 
 using Foundation;
 using Security;
+using System.Text;
 
 /*
 
@@ -29,7 +30,7 @@ using Security;
     </dict>
 </dict>
 
- */ 
+ */
 
 namespace ModernHttpClient
 {
@@ -136,18 +137,42 @@ namespace ModernHttpClient
                 headers = headers.Union(request.Content.Headers).ToArray();
             }
 
+            // Add Cookie Header if any cookie for the domain in the cookie store
+            var stringBuilder = new StringBuilder();
+            var cookies = NSHttpCookieStorage.SharedStorage.Cookies
+                                             .Where(c => c.Domain == request.RequestUri.Host)
+                                             .ToList();
+            foreach (var cookie in cookies)
+            {
+                stringBuilder.Append(cookie.Name + "=" + cookie.Value + ";");
+            }
+
             var rq = new NSMutableUrlRequest()
             {
                 AllowsCellularAccess = true,
                 Body = NSData.FromArray(ms.ToArray()),
                 CachePolicy = (!this.DisableCaching ? NSUrlRequestCachePolicy.UseProtocolCachePolicy : NSUrlRequestCachePolicy.ReloadIgnoringCacheData),
                 Headers = headers.Aggregate(new NSMutableDictionary(), (acc, x) => {
-                    acc.Add(new NSString(x.Key), new NSString(String.Join(getHeaderSeparator(x.Key), x.Value)));
+
+                    if (x.Key == "Cookie")
+                    {
+                        foreach (var val in x.Value)
+                            stringBuilder.Append(val + ";");
+                    }
+                    else
+                    {
+                        acc.Add(new NSString(x.Key), new NSString(String.Join(getHeaderSeparator(x.Key), x.Value)));
+                    }
+
                     return acc;
                 }),
                 HttpMethod = request.Method.ToString().ToUpperInvariant(),
                 Url = NSUrl.FromString(request.RequestUri.AbsoluteUri),
             };
+
+            var copy = new NSMutableDictionary(rq.Headers);
+            copy.Add(new NSString("Cookie"), new NSString(stringBuilder.ToString().TrimEnd(';')));
+            rq.Headers = copy;
 
             if (Timeout != null)
                 rq.TimeoutInterval = Timeout.Value.Seconds;
