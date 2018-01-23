@@ -73,6 +73,14 @@ var response = await client.GetAsync(new Uri("https://self-signed.badssl.com"));
 
 #### Release Notes
 
+2.5.3
+
+[Update] Cookies not being merged when Cookie header is provided
+
+2.5.2
+
+[Update] Cookies set with the native handler will be merged into the Cookie header
+
 2.5.1
 
 [Android] NativeCookieHandler, if provided, is set as the default CookieJar for OkHttpClient
@@ -82,6 +90,14 @@ var response = await client.GetAsync(new Uri("https://self-signed.badssl.com"));
 2.5.0
 
 [Android] Updating to Square.OkHttp3
+
+2.4.7
+
+[Update] Cookies not being merged when Cookie header is provided
+
+2.4.6
+
+[Update] Cookies set with the native handler will be merged into the Cookie header
 
 2.4.5
 
