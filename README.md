@@ -39,7 +39,7 @@ private static HttpClient httpClient = new HttpClient(new NativeMessageHandler()
 
 ### How to use NativeCookieHandler?
 
-SetCookie before making the http call so, it will be loaded by OkHttp3.CookieJar.LoadForRequest
+SetCookie before making the http call and they will be added to Cookie header in the native client:
 
 ```cs
 var cookieHandler = new NativeCookieHandler();
