@@ -12,9 +12,9 @@ This is made possible by two native libraries:
 * On Android, via [OkHttp3](http://square.github.io/okhttp/)
 * On UWP, via a custom HttpClientHandler.
 
-## How can I use this in a PCL?
+## How can I use this from shared code?
 
-Just reference the Portable version of ModernHttpClient in your Portable Library, and it will use the correct version on all platforms.
+Just reference the Portable version of ModernHttpClient in your Portable or .Net Standard Library, and it will use the correct version on all platforms.
 
 ## Usage
 
