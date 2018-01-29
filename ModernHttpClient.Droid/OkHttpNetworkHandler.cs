@@ -166,8 +166,6 @@ namespace ModernHttpClient
                     stringBuilder.Append(cookie.Name() + "=" + cookie.Value() + ";");
                 }
             }
-
-            //foreach (var kvp in keyValuePairs) requestBuilder.AddHeader(kvp.Key, String.Join(getHeaderSeparator(kvp.Key), kvp.Value));
                 
             foreach (var kvp in keyValuePairs)
             {
@@ -182,12 +180,12 @@ namespace ModernHttpClient
                 }
             }
 
-            requestBuilder.AddHeader("Cookie", stringBuilder.ToString().TrimEnd(';'));
+            if (stringBuilder.Length > 0)
+                requestBuilder.AddHeader("Cookie", stringBuilder.ToString().TrimEnd(';'));
 
             cancellationToken.ThrowIfCancellationRequested();
 
             var rq = requestBuilder.Build();
-            //var headers = rq.Headers();
             var call = client.NewCall(rq);
 
             // NB: Even closing a socket must be done off the UI thread. Cray!

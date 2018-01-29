@@ -139,6 +139,7 @@ namespace ModernHttpClient
 
             // Add Cookie Header if any cookie for the domain in the cookie store
             var stringBuilder = new StringBuilder();
+
             var cookies = NSHttpCookieStorage.SharedStorage.Cookies
                                              .Where(c => c.Domain == request.RequestUri.Host)
                                              .ToList();
@@ -170,9 +171,12 @@ namespace ModernHttpClient
                 Url = NSUrl.FromString(request.RequestUri.AbsoluteUri),
             };
 
-            var copy = new NSMutableDictionary(rq.Headers);
-            copy.Add(new NSString("Cookie"), new NSString(stringBuilder.ToString().TrimEnd(';')));
-            rq.Headers = copy;
+            if (stringBuilder.Length > 0)
+            {
+                var copy = new NSMutableDictionary(rq.Headers);
+                copy.Add(new NSString("Cookie"), new NSString(stringBuilder.ToString().TrimEnd(';')));
+                rq.Headers = copy;
+            }
 
             if (Timeout != null)
                 rq.TimeoutInterval = Timeout.Value.Seconds;
