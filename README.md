@@ -10,6 +10,11 @@ This is made possible by two native libraries:
 
 * On iOS, [NSURLSession](https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSession_class/Introduction/Introduction.html)
 * On Android, via [OkHttp3](http://square.github.io/okhttp/)
+* On UWP, via a custom HttpClientHandler.
+
+## How can I use this in a PCL?
+
+Just reference the Portable version of ModernHttpClient in your Portable Library, and it will use the correct version on all platforms.
 
 ## Usage
 
@@ -21,31 +26,6 @@ Here's how it works:
 ```cs
 private static HttpClient httpClient = new HttpClient(new NativeMessageHandler() { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true, DisableCaching = true });
 ```
-
-## Self-signed certificates
-
-A new property named EnableUntrustedCertificates has been added to support self-signed certificates.
-
-To make it work in iOS, add this to your info.plist:
-
-```xml
-<key>NSAppTransportSecurity</key>
-<dict>
-    <key>NSExceptionDomains</key>
-    <dict>
-        <key>your-self-signed.badssl.com</key>
-        <dict>
-            <key>NSExceptionAllowsInsecureHTTPLoads</key>
-            <true/>
-        </dict>
-    </dict>
-</dict>
-```
-
-## How can I use this in a PCL?
-
-Just reference the Portable version of ModernHttpClient in your Portable
-Library, and it will use the correct version on all platforms.
 
 ## NativeCookieHandler methods
 
@@ -71,13 +51,35 @@ cookieHandler.SetCookie(cookie);
 var response = await client.GetAsync(new Uri("https://self-signed.badssl.com"));
 ```
 
+## Self-signed certificates
+
+A new property named EnableUntrustedCertificates has been added to support self-signed certificates.
+
+To make it work in iOS, add this to your info.plist:
+
+```xml
+<key>NSAppTransportSecurity</key>
+<dict>
+    <key>NSExceptionDomains</key>
+    <dict>
+        <key>your-self-signed.badssl.com</key>
+        <dict>
+            <key>NSExceptionAllowsInsecureHTTPLoads</key>
+            <true/>
+        </dict>
+    </dict>
+</dict>
+```
+
 #### Release Notes
 
+2.6.0
+
+[Update] Adding support for UWP
+
+[Update] Adding support for netstandard 2.0
+
 2.5.3
-
-[Update] Cookies not being merged when Cookie header is provided
-
-2.5.2
 
 [Update] Cookies set with the native handler will be merged into the Cookie header
 
@@ -92,10 +94,6 @@ var response = await client.GetAsync(new Uri("https://self-signed.badssl.com"));
 [Android] Updating to Square.OkHttp3
 
 2.4.7
-
-[Update] Cookies not being merged when Cookie header is provided
-
-2.4.6
 
 [Update] Cookies set with the native handler will be merged into the Cookie header
 
