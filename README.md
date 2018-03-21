@@ -10,6 +10,11 @@ This is made possible by two native libraries:
 
 * On iOS, [NSURLSession](https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSession_class/Introduction/Introduction.html)
 * On Android, via [OkHttp3](http://square.github.io/okhttp/)
+* On UWP, via a custom HttpClientHandler.
+
+## How can I use this from shared code?
+
+Just reference the Portable version of ModernHttpClient in your Portable or .Net Standard Library, and it will use the correct version on all platforms.
 
 ## Usage
 
@@ -22,9 +27,33 @@ Here's how it works:
 private static HttpClient httpClient = new HttpClient(new NativeMessageHandler() { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true, DisableCaching = true });
 ```
 
+## NativeCookieHandler methods
+
+```SetCookies(IEnumerable<Cookie> cookies)```: set native cookies
+
+```DeleteCookies()```: delete all native cookies.
+
+```SetCookie(Cookie cookie)```: set a native cookie.
+
+```DeleteCookie(Cookie cookie)```: delete a native cookie.
+
+### How to use NativeCookieHandler?
+
+SetCookie before making the http call and they will be added to Cookie header in the native client:
+
+```cs
+var cookieHandler = new NativeCookieHandler();
+private static HttpClient httpClient = new HttpClient(new NativeMessageHandler(false, false, cookieHandler) { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true });
+
+var cookie = new Cookie("cookie1", "value1", "/", "self-signed.badssl.com");
+cookieHandler.SetCookie(cookie);
+
+var response = await client.GetAsync(new Uri("https://self-signed.badssl.com"));
+```
+
 ## Self-signed certificates
 
-A new property named EnableUntrustedCertificates has been added to support self-signed certificates.
+Set EnableUntrustedCertificates to true to support self-signed certificates.
 
 To make it work in iOS, add this to your info.plist:
 
@@ -42,42 +71,15 @@ To make it work in iOS, add this to your info.plist:
 </dict>
 ```
 
-## How can I use this in a PCL?
-
-Just reference the Portable version of ModernHttpClient in your Portable
-Library, and it will use the correct version on all platforms.
-
-## NativeCookieHandler methods
-
-```SetCookies(IEnumerable<Cookie> cookies)```: set native cookies
-
-```DeleteCookies()```: delete all native cookies.
-
-```SetCookie(Cookie cookie)```: set a native cookie.
-
-```DeleteCookie(Cookie cookie)```: delete a native cookie.
-
-### How to use NativeCookieHandler?
-
-SetCookie before making the http call so, it will be loaded by OkHttp3.CookieJar.LoadForRequest
-
-```cs
-var cookieHandler = new NativeCookieHandler();
-private static HttpClient httpClient = new HttpClient(new NativeMessageHandler(false, false, cookieHandler) { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true });
-
-var cookie = new Cookie("cookie1", "value1", "/", "self-signed.badssl.com");
-cookieHandler.SetCookie(cookie);
-
-var response = await client.GetAsync(new Uri("https://self-signed.badssl.com"));
-```
-
 #### Release Notes
 
+2.6.0
+
+[Update] Adding support for UWP
+
+[Update] Adding support for netstandard 2.0
+
 2.5.3
-
-[Update] Cookies not being merged when Cookie header is provided
-
-2.5.2
 
 [Update] Cookies set with the native handler will be merged into the Cookie header
 
@@ -92,10 +94,6 @@ var response = await client.GetAsync(new Uri("https://self-signed.badssl.com"));
 [Android] Updating to Square.OkHttp3
 
 2.4.7
-
-[Update] Cookies not being merged when Cookie header is provided
-
-2.4.6
 
 [Update] Cookies set with the native handler will be merged into the Cookie header
 
