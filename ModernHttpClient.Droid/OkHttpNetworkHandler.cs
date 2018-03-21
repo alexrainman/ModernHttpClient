@@ -35,17 +35,28 @@ namespace ModernHttpClient
 
         public NativeMessageHandler() : this(false, false) {}
 
-        public NativeMessageHandler(bool throwOnCaptiveNetwork, bool customSSLVerification, NativeCookieHandler cookieHandler = null)
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, bool customSSLVerification, NativeCookieHandler cookieHandler = null, Func<string, ISSLSession, bool> verifyHostnameCallback = null)
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
 
             var clientBuilder = client.NewBuilder();
 
-            if (customSSLVerification)
+            /*if (customSSLVerification)
             {
                 clientBuilder.HostnameVerifier((hostname, session) => {
                     return HostnameVerifier.verifyServerCertificate(hostname, session) & HostnameVerifier.verifyClientCiphers(hostname, session);
                 });
+            }*/
+
+            // verifyHostnameCallback parameter function on constructor (NativeMessageHandler - Android) when customSSLVerification is true #6
+            if (customSSLVerification)
+            {
+                clientBuilder.HostnameVerifier(verifyHostnameCallback == null ?
+                    (hostname, session) =>
+                    {
+                        return HostnameVerifier.verifyServerCertificate(hostname, session) & HostnameVerifier.verifyClientCiphers(hostname, session);
+                    }
+                : verifyHostnameCallback);
             }
 
             if (cookieHandler != null) {
@@ -213,7 +224,8 @@ namespace ModernHttpClient
                     throw new System.OperationCanceledException();
                 }
 
-                throw;
+                // Calling HttpClient methods should throw .Net Exception when fail #5
+                throw new Exception(ex.Message, ex);
             }
 
             var respBody = resp.Body();
