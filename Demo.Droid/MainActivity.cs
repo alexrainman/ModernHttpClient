@@ -24,7 +24,7 @@ namespace Demo.Droid
         {
             base.OnResume();
 
-            var cookieHandler = new NativeCookieHandler();
+            /*var cookieHandler = new NativeCookieHandler();
 
             var client = new HttpClient(new NativeMessageHandler(false, false, cookieHandler) { EnableUntrustedCertificates = true, Timeout = new TimeSpan(0,0,9) });
 
@@ -44,7 +44,20 @@ namespace Demo.Droid
 
             cookieHandler.DeleteCookies();
 
-            Console.WriteLine(timer.ElapsedMilliseconds);
+            Console.WriteLine(timer.ElapsedMilliseconds);*/
+
+            NativeMessageHandler handler = new NativeMessageHandler();
+            handler.EnableUntrustedCertificates = true;
+            handler.Timeout = System.TimeSpan.FromSeconds(15);
+            handler.DisableCaching = true;
+            if (handler.SupportsAutomaticDecompression)
+                handler.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
+
+            var client = new HttpClient(handler);
+
+            var responsehttps = await client.GetAsync("https://www.google.com");
+
+            Console.WriteLine(responsehttps.ReasonPhrase);
         }
     }
 }

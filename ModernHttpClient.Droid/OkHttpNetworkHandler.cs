@@ -225,7 +225,7 @@ namespace ModernHttpClient
                 }
 
                 // Calling HttpClient methods should throw .Net Exception when fail #5
-                throw new Exception(ex.Message, ex);
+                throw new HttpRequestException(ex.Message, ex);
             }
 
             var respBody = resp.Body();
@@ -235,6 +235,20 @@ namespace ModernHttpClient
             var ret = new HttpResponseMessage((HttpStatusCode)resp.Code());
             ret.RequestMessage = request;
             ret.ReasonPhrase = resp.Message();
+
+            // ReasonPhrase is empty under HTTPS #8
+            if (string.IsNullOrEmpty(ret.ReasonPhrase))
+            {
+                try
+                {
+                    ret.ReasonPhrase = ((ReasonPhrases)resp.Code()).ToString().Replace('_', ' ');
+                }
+                catch (Exception ex)
+                {
+                    ret.ReasonPhrase = "Unassigned";
+                }
+            }
+
             if (respBody != null)
             {
                 var content = new ProgressStreamContent(respBody.ByteStream(), CancellationToken.None);

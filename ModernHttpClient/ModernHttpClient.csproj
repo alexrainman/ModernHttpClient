@@ -33,6 +33,7 @@
     <Compile Include="NativeMessageHandler.cs" />
     <Compile Include="ProgressStreamContent.cs" />
     <Compile Include="NativeCookieHandler.cs" />
+    <Compile Include="ReasonPhrases.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
 </Project>
