@@ -1,0 +1,134 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;MonoAndroid80;Xamarin.iOS10;uap10.0.15063;</TargetFrameworks>
+    <AssemblyName>ModernHttpClient</AssemblyName>
+    <RootNamespace>ModernHttpClient</RootNamespace>
+    <PackageId>modernhttpclient-updated</PackageId>
+    
+    <Product>$(AssemblyName) ($(TargetFramework))</Product>
+    <AssemblyVersion>2.7.0.0</AssemblyVersion>
+    <AssemblyFileVersion>2.7.0.0</AssemblyFileVersion>
+    <Version>2.7.0.0</Version>
+    <PackageVersion>2.7.0.0</PackageVersion>
+    <PackOnBuild>true</PackOnBuild>
+    <NeutralLanguage>en</NeutralLanguage>
+    <LangVersion>default</LangVersion>
+    <DefineConstants>$(DefineConstants);</DefineConstants>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile Condition=" '$(Configuration)' == 'Release' ">true</GenerateDocumentationFile>
+    <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    
+    <!--TODO: Fill these in-->
+    <PackageLicenseUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/COPYING</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/alexrainman/ModernHttpClient</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/alexrainman/ModernHttpClient</RepositoryUrl>
+    <PackageReleaseNotes>
+      2.7.0
+      [Update] Migrating to a multi-target project
+      [Android] Calling HttpClient methods should throw .Net Exception when fail #5
+      [Android] VerifyHostnameCallback parameter function on constructor (NativeMessageHandler - Android) when customSSLVerification is true #6
+      [Android] ReasonPhrase is empty under HTTPS #8
+      2.6.0
+      [Update] Adding support for UWP
+      [Update] Adding support for netstandard 2.0
+      2.5.3
+      [Update] Cookies set with the native handler will be merged into the Cookie header
+      2.5.1
+      [Android] NativeCookieHandler, if provided, is set as the default CookieJar for OkHttpClient
+      [Update] Adding DeleteCookies, SetCookie and DeleteCookie to NativeCookieHandler
+      2.5.0
+      [Android] Updating to Square.OkHttp3
+      2.4.7
+      [Update] Cookies set with the native handler will be merged into the Cookie header
+      2.4.5
+      [Android] NativeCookieHandler, if provided, is set as the default cookie handler for OkHttpClient
+      [Update] Adding DeleteCookies, SetCookie and DeleteCookie to NativeCookieHandler
+      2.4.4
+      [Android] SIGABRT after UnknownHostException #229
+      [iOS] Updating obsolete NSUrlSessionDelegate to INSUrlSessionDelegate
+      [Update] Adding EnableUntrustedCertificates to support self-signed certificates
+      2.4.3
+      [Update] Adding Timeout property
+      [Android] Updating to Square.OkHttp 2.7.5
+      [Android] Timeout value is not respected on Android #192
+    </PackageReleaseNotes>
+    <PackageIconUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/download.png</PackageIconUrl>
+    <PackageTags>xamarin, windows, ios, android, xamarin.forms, plugin, ModernHttpClient</PackageTags>
+    
+    <Title>ModernHttpClient Plugin for Xamarin and Windows</Title>
+    <Summary>Write your app using System.Net.Http, but drop this library in and it will go drastically faster.</Summary>
+    <Description>Write your app using System.Net.Http, but drop this library in and it will go drastically faster.</Description>
+
+    <Owners>Alex Rainman</Owners>
+    <Authors>Paul Betts</Authors>
+    <Copyright>Copyright Paul Betts © 2012</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Shared\CaptiveNetworkException.cs" />
+    <None Remove="Shared\NativeCookieHandler.cs" />
+    <None Remove="Shared\NativeMessageHandler.cs" />
+    <None Remove="Shared\ReasonPhrases.cs" />
+    <None Remove="Shared\Utility.cs" />
+  </ItemGroup>
+
+  <!--
+  <ItemGroup>
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.2.0" PrivateAssets="All" />
+  </ItemGroup>
+  -->
+
+  <!--
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.0' ">
+    <Compile Include="Shared\**\*.cs" />
+  </ItemGroup>
+  -->
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <Compile Include="Shared\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0.15063' ">
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.2.0" />
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="5.2.3" />
+    <Compile Include="Platforms\UWP\**\*.cs" />
+    <Compile Include="Shared\**\CaptiveNetworkException.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid80' ">
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.2.0" />
+    <Compile Include="Platforms\Android\**\*.cs" />
+    <Compile Include="Shared\**\CaptiveNetworkException.cs" />
+    <Compile Include="Shared\**\ProgressStreamContent.cs" />
+    <Compile Include="Shared\**\ReasonPhrases.cs" />
+    <Compile Include="Shared\**\Utility.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'Xamarin.iOS10' ">
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.2.0" />
+    <Compile Include="Platforms\iOS\**\*.cs" />
+    <Compile Include="Shared\**\CaptiveNetworkException.cs" />
+    <Compile Include="Shared\**\ProgressStreamContent.cs" />
+    <Compile Include="Shared\**\Utility.cs" />
+  </ItemGroup>
+
+  <!--
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+    <Compile Include="Shared\**\*.cs" />
+  </ItemGroup>
+  -->
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid80'">
+    <PackageReference Include="Square.OkHttp3">
+      <Version>3.8.1</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.4.0" />
+  </ItemGroup>
+
+  <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
+</Project>

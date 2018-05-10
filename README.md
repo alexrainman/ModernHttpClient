@@ -73,6 +73,12 @@ To make it work in iOS, add this to your info.plist:
 
 #### Release Notes
 
+2.7.0      
+[Update] Migrating to a multi-target project      
+[Android] Calling HttpClient methods should throw .Net Exception when fail #5      
+[Android] VerifyHostnameCallback parameter function on constructor (NativeMessageHandler - Android) when customSSLVerification is true #6      
+[Android] ReasonPhrase is empty under HTTPS #8
+
 2.6.0
 
 [Update] Adding support for UWP
