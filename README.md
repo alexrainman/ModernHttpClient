@@ -24,7 +24,8 @@ using ModernHttpClient is the most boring thing in the world.
 Here's how it works:
 
 ```cs
-private static HttpClient httpClient = new HttpClient(new NativeMessageHandler() { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true, DisableCaching = true });
+var handler = new NativeMessageHandler() { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true, DisableCaching = true };
+private static HttpClient httpClient = new HttpClient(handler);
 ```
 
 ## NativeCookieHandler methods
@@ -43,7 +44,8 @@ SetCookie before making the http call and they will be added to Cookie header in
 
 ```cs
 var cookieHandler = new NativeCookieHandler();
-private static HttpClient httpClient = new HttpClient(new NativeMessageHandler(false, false, cookieHandler) { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true });
+var handler = new NativeMessageHandler(false, false, cookieHandler) { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true };
+private static HttpClient httpClient = new HttpClient(handler);
 
 var cookie = new Cookie("cookie1", "value1", "/", "self-signed.badssl.com");
 cookieHandler.SetCookie(cookie);
@@ -73,10 +75,14 @@ To make it work in iOS, add this to your info.plist:
 
 #### Release Notes
 
-2.7.0      
-[Update] Migrating to a multi-target project      
-[Android] Calling HttpClient methods should throw .Net Exception when fail #5      
-[Android] VerifyHostnameCallback parameter function on constructor (NativeMessageHandler - Android) when customSSLVerification is true #6      
+2.7.0
+      
+[Update] Migrating to a multi-target project
+      
+[Android] Calling HttpClient methods should throw .Net Exception when fail #5
+      
+[Android] VerifyHostnameCallback parameter function on constructor (NativeMessageHandler - Android) when customSSLVerification is true #6
+      
 [Android] ReasonPhrase is empty under HTTPS #8
 
 2.6.0
