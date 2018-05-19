@@ -73,9 +73,9 @@ To make it work in iOS, add this to your info.plist:
 </dict>
 ```
 
-## Android custom Hostname Verifier Callback.
+## Android: Hostname Verifier Callback.
 
-Custom Hostname Verifier callback parameter has been removed from NativeMessageHandler constructor. Use "verifyHostnameCallback" static property instead.
+Hostname Verifier callback parameter has been removed from NativeMessageHandler constructor. Use "verifyHostnameCallback" static property instead.
 
 At your Android project and before creating the NativeMessageHandler instance:
 
@@ -87,7 +87,7 @@ NativeMessageHandler.verifyHostnameCallback = (hostname, session) =>
 };
 ```
 
-## iOS Minimum SSL Protocol
+## iOS: Minimum SSL Protocol
 
 Minimum SSL Protocol parameter has been removed from NativeMessageHandler constructor. USe "minimumSSLProtocol" static property instead.
 
