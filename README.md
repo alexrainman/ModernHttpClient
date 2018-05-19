@@ -80,16 +80,25 @@ To make it work in iOS, add this to your info.plist:
 
 ## iOS Minimum SSL Protocol
 
-System.Net.ServicePointManager.SecurityProtocol provides a mechanism for specifying supported protocol types for System.Net. Since iOS only provides an API for a minimum and maximum protocol we are not able to port this configuration directly and instead use the specified minimum value when one is specified.
+Minimum SSL Protocol has been removed from NativeMessageHandler constructor. USe "minimumSSLProtocol" static property instead.
 
-At AppDelegate or before creating the NativeMessageHandler instance:
+At your iOS project and before creating the NativeMessageHandler instance:
 
 ```cs
 NativeMessageHandler.minimumSSLProtocol = SslProtocol.Tls_1_2;
-var messageHandler = new NativeMessageHandler() { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true, DisableCaching = true };
 ```
 
+System.Net.ServicePointManager.SecurityProtocol provides a mechanism for specifying supported protocol types for System.Net. Since iOS only provides an API for a minimum and maximum protocol we are not able to port this configuration directly and instead use the specified minimum value when one is specified.
+
 #### Release Notes
+
+2.7.1
+
+[Android] MissingMethodException Method 'ModernHttpClient.NativeMessageHandler..ctor' not found. #9
+
+[iOS] Removing minimumSSLProtocol from NativeMessageHandler ctor
+
+[UWP] Exception on UWP with Xamarin Forms #3
 
 2.7.0
       
