@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
-namespace ModernHttpClient.UWP
+namespace ModernHttpClient
 {
     public class NativeCookieHandler : CookieContainer
     {
@@ -57,15 +57,8 @@ namespace ModernHttpClient.UWP
             {
                 var collection = this.GetCookies(this.CurrentUri);
                 var cookies = new Cookie[collection.Count];
-                
-                //collection.CopyTo(cookies, 0);
 
-                var enumerator = collection.GetEnumerator();
-                for(var i=0;i<collection.Count-1;i++)
-                {
-                    cookies[i] = (Cookie)enumerator.Current;
-                    enumerator.MoveNext();
-                }
+                collection.CopyTo(cookies, 0);
 
                 return cookies.ToList();
             }

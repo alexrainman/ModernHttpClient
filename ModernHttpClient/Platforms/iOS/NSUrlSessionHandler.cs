@@ -68,7 +68,9 @@ namespace ModernHttpClient
 
         public NativeMessageHandler() : this(false, false) {}
 
-        public NativeMessageHandler(bool throwOnCaptiveNetwork, bool customSSLVerification, NativeCookieHandler cookieHandler = null, SslProtocol? minimumSSLProtocol = null)
+        public static SslProtocol? minimumSSLProtocol;
+
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, bool customSSLVerification, NativeCookieHandler cookieHandler = null)
         {
             var configuration = NSUrlSessionConfiguration.DefaultSessionConfiguration;
 

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ModernHttpClient.UWP
+namespace ModernHttpClient
 {
     public class NativeMessageHandler : HttpClientHandler
     {
@@ -37,49 +38,63 @@ namespace ModernHttpClient.UWP
             }
 
             // Set Timeout
-            var source = new CancellationTokenSource(Timeout.Value);
-            cancellationToken = source.Token;
+            if (this.Timeout != null)
+            {
+                var source = new CancellationTokenSource(Timeout.Value);
+                cancellationToken = source.Token;
+            }
 
             // Disable caching
             if (this.DisableCaching)
             {
-                request.Headers.CacheControl.NoCache = true;
-                request.Headers.CacheControl.NoStore = true;
+                var cache = new CacheControlHeaderValue();
+                cache.NoCache = true;
+                cache.NoStore = true;
+                request.Headers.CacheControl = cache;
             }
 
             // Add Cookie Header if any cookie for the domain in the cookie store
             var stringBuilder = new StringBuilder();
 
-            var cookies = ((NativeCookieHandler)this.CookieContainer).Cookies;
+            // TODO: check if CookieContainer is NativeCookieHandler
 
-            if (cookies != null)
+            var nativeCookieHandler = this.CookieContainer as NativeCookieHandler;
+
+            if (nativeCookieHandler != null)
             {
-                foreach (var cookie in cookies)
+                var cookies = nativeCookieHandler.Cookies;
+
+                if (cookies != null)
                 {
-                    stringBuilder.Append(cookie.Name + "=" + cookie.Value + ";");
+                    foreach (var cookie in cookies)
+                    {
+                        if (cookie != null)
+                            stringBuilder.Append(cookie.Name + "=" + cookie.Value + ";");
+                    }
                 }
-            }
 
-            var headers = request.Headers;
+                var headers = request.Headers;
 
-            foreach (var h in headers)
-            {
-                if (h.Key == "Cookie")
+                foreach (var h in headers)
                 {
-                    foreach (var val in h.Value)
-                        stringBuilder.Append(val + ";");
+                    if (h.Key == "Cookie")
+                    {
+                        foreach (var val in h.Value)
+                            stringBuilder.Append(val + ";");
+                    }
                 }
-            }
 
-            if (stringBuilder.Length > 0)
-                request.Headers.Set("Cookie", stringBuilder.ToString().TrimEnd(';'));
+                if (stringBuilder.Length > 0)
+                    request.Headers.Set("Cookie", stringBuilder.ToString().TrimEnd(';'));
+            }
 
             var response = base.SendAsync(request, cancellationToken);
+            var result = response.GetAwaiter().GetResult();
 
             // throwOnCaptiveNetwork
-            if (this.throwOnCaptiveNetwork && request.RequestUri.Host != response.Result.RequestMessage.RequestUri.Host)
+            if (this.throwOnCaptiveNetwork && request.RequestUri.Host != result.RequestMessage.RequestUri.Host)
             {
-                throw new CaptiveNetworkException(request.RequestUri, response.Result.RequestMessage.RequestUri);
+                throw new CaptiveNetworkException(request.RequestUri, result.RequestMessage.RequestUri);
             }
 
             return response;

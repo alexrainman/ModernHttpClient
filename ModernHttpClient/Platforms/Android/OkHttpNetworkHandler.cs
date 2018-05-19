@@ -34,7 +34,9 @@ namespace ModernHttpClient
 
         public NativeMessageHandler() : this(false, false) {}
 
-        public NativeMessageHandler(bool throwOnCaptiveNetwork, bool customSSLVerification, NativeCookieHandler cookieHandler = null, Func<string, ISSLSession, bool> verifyHostnameCallback = null)
+        public static Func<string, ISSLSession, bool> verifyHostnameCallback;
+
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, bool customSSLVerification, NativeCookieHandler cookieHandler = null)
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
 

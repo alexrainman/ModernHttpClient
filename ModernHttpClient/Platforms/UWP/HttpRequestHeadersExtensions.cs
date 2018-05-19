@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Headers;
 
-namespace ModernHttpClient.UWP
+namespace ModernHttpClient
 {
     public static class HttpRequestHeadersExtensions
     {

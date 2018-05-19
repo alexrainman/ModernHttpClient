@@ -1,16 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;MonoAndroid80;Xamarin.iOS10;uap10.0.15063;</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;MonoAndroid80;Xamarin.iOS10;uap10.0.16299;</TargetFrameworks>
     <AssemblyName>ModernHttpClient</AssemblyName>
     <RootNamespace>ModernHttpClient</RootNamespace>
     <PackageId>modernhttpclient-updated</PackageId>
     
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
-    <AssemblyVersion>2.7.0.0</AssemblyVersion>
-    <AssemblyFileVersion>2.7.0.0</AssemblyFileVersion>
-    <Version>2.7.0.0</Version>
-    <PackageVersion>2.7.0.0</PackageVersion>
+    <AssemblyVersion>2.7.1</AssemblyVersion>
+    <AssemblyFileVersion>2.7.1</AssemblyFileVersion>
+    <Version>2.7.1</Version>
+    <PackageVersion>2.7.1</PackageVersion>
     <PackOnBuild>true</PackOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <LangVersion>default</LangVersion>
@@ -25,6 +25,10 @@
     <PackageProjectUrl>https://github.com/alexrainman/ModernHttpClient</PackageProjectUrl>
     <RepositoryUrl>https://github.com/alexrainman/ModernHttpClient</RepositoryUrl>
     <PackageReleaseNotes>
+      2.7.1
+      [Android] MissingMethodException Method 'ModernHttpClient.NativeMessageHandler..ctor' not found. #9
+      [iOS] Removing minimumSSLProtocol from NativeMessageHandler ctor
+      [UWP] Exception on UWP with Xamarin Forms #3
       2.7.0
       [Update] Migrating to a multi-target project
       [Android] Calling HttpClient methods should throw .Net Exception when fail #5
@@ -62,7 +66,7 @@
     <Description>Write your app using System.Net.Http, but drop this library in and it will go drastically faster.</Description>
 
     <Owners>Alex Rainman</Owners>
-    <Authors>Paul Betts</Authors>
+    <Authors>Alex Rainman</Authors>
     <Copyright>Copyright Paul Betts © 2012</Copyright>
   </PropertyGroup>
 
@@ -74,31 +78,22 @@
     <None Remove="Shared\Utility.cs" />
   </ItemGroup>
 
-  <!--
   <ItemGroup>
-    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.2.0" PrivateAssets="All" />
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.4.0" PrivateAssets="All" />
   </ItemGroup>
-  -->
-
-  <!--
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.0' ">
-    <Compile Include="Shared\**\*.cs" />
-  </ItemGroup>
-  -->
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <Compile Include="Shared\**\*.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0.15063' ">
-    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.2.0" />
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="5.2.3" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0.16299' ">
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.0.6" />
     <Compile Include="Platforms\UWP\**\*.cs" />
     <Compile Include="Shared\**\CaptiveNetworkException.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid80' ">
-    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.2.0" />
+    <PackageReference Include="Square.OkHttp3" Version="3.8.1" />
     <Compile Include="Platforms\Android\**\*.cs" />
     <Compile Include="Shared\**\CaptiveNetworkException.cs" />
     <Compile Include="Shared\**\ProgressStreamContent.cs" />
@@ -107,27 +102,10 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'Xamarin.iOS10' ">
-    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.2.0" />
     <Compile Include="Platforms\iOS\**\*.cs" />
     <Compile Include="Shared\**\CaptiveNetworkException.cs" />
     <Compile Include="Shared\**\ProgressStreamContent.cs" />
     <Compile Include="Shared\**\Utility.cs" />
-  </ItemGroup>
-
-  <!--
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <Compile Include="Shared\**\*.cs" />
-  </ItemGroup>
-  -->
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid80'">
-    <PackageReference Include="Square.OkHttp3">
-      <Version>3.8.1</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.4.0" />
   </ItemGroup>
 
   <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
