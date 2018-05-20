@@ -61,7 +61,7 @@ cookieHandler.SetCookie(cookie);
 var response = await client.GetAsync(new Uri("https://self-signed.badssl.com"));
 ```
 
-## iOS: Self-signed certificates
+## Self-signed certificates
 
 Set EnableUntrustedCertificates to true to support self-signed certificates.
 
@@ -81,7 +81,7 @@ To make it work in iOS, add this to your info.plist:
 </dict>
 ```
 
-## Android: Hostname Verifier Callback.
+## Hostname Verifier Callback (Android)
 
 Hostname Verifier callback parameter has been removed from NativeMessageHandler constructor. Use "verifyHostnameCallback" static property instead.
 
@@ -97,7 +97,7 @@ NativeMessageHandler.verifyHostnameCallback = (hostname, session) =>
 
 As ServicePointManager is not implemented.
 
-## iOS: Minimum SSL Protocol
+## Minimum SSL Protocol (iOS)
 
 Minimum SSL Protocol parameter has been removed from NativeMessageHandler constructor. USe "minimumSSLProtocol" static property instead.
 
