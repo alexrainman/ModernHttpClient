@@ -6,7 +6,7 @@ Available on NuGet: https://www.nuget.org/packages/modernhttpclient-updated/ [![
 This library brings the latest platform-specific networking libraries to
 Xamarin applications via a custom HttpClient handler. Write your app using
 System.Net.Http, but drop this library in and it will go drastically faster.
-This is made possible by two native libraries:
+This is made possible by:
 
 * On iOS, [NSURLSession](https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSession_class/Introduction/Introduction.html)
 * On Android, via [OkHttp3](http://square.github.io/okhttp/)
