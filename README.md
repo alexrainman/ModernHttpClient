@@ -61,7 +61,7 @@ cookieHandler.SetCookie(cookie);
 var response = await client.GetAsync(new Uri("https://self-signed.badssl.com"));
 ```
 
-## Self-signed certificates
+## iOS: Self-signed certificates
 
 Set EnableUntrustedCertificates to true to support self-signed certificates.
 
