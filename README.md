@@ -24,7 +24,11 @@ using ModernHttpClient is the most boring thing in the world.
 Here's how it works:
 
 ```cs
-var messageHandler = new NativeMessageHandler() { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true, DisableCaching = true };
+var messageHandler = new NativeMessageHandler() {
+    Timeout = new TimeSpan(0,0,9),
+    EnableUntrustedCertificates = true,
+    DisableCaching = true
+};
 private static HttpClient httpClient = new HttpClient(messageHandler);
 ```
 
@@ -44,7 +48,11 @@ SetCookie before making the http call and they will be added to Cookie header in
 
 ```cs
 var cookieHandler = new NativeCookieHandler();
-var messageHandler = new NativeMessageHandler(false, false, cookieHandler) { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true };
+var messageHandler = new NativeMessageHandler(false, false, cookieHandler) {
+    Timeout = new TimeSpan(0,0,9),
+    EnableUntrustedCertificates = true,
+    DisableCaching = true
+};
 private static HttpClient httpClient = new HttpClient(messageHandler);
 
 var cookie = new Cookie("cookie1", "value1", "/", "self-signed.badssl.com");
