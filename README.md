@@ -18,8 +18,7 @@ Just reference the Portable version of ModernHttpClient in your Portable or .Net
 
 ## Usage
 
-The good news is, you don't have to know either of these two libraries above,
-using ModernHttpClient is the most boring thing in the world.
+The good news is, you don't have to know either of these two libraries above.
 
 Here's how it works:
 
