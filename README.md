@@ -62,7 +62,7 @@ var response = await client.GetAsync(new Uri("https://self-signed.badssl.com"));
 
 ## Self-signed certificates
 
-Set EnableUntrustedCertificates to true to support self-signed certificates.
+Set EnableUntrustedCertificates to true to support self-signed certificates, this is intended to testing environments.
 
 To make it work in iOS, add this to your info.plist:
 
