@@ -14,7 +14,7 @@ This is made possible by:
 
 ## How can I use this from shared code?
 
-Just reference the Portable version of ModernHttpClient in your Portable or .Net Standard Library, and it will use the correct version on all platforms.
+Just reference the portable version of ModernHttpClient in your .Net Standard Library, and it will use the correct version on all platforms.
 
 ## Usage
 
