@@ -94,8 +94,6 @@ NativeMessageHandler.verifyHostnameCallback = (hostname, session) =>
 };
 ```
 
-As ServicePointManager is not implemented.
-
 ## Minimum SSL Protocol (iOS)
 
 Minimum SSL Protocol parameter has been removed from NativeMessageHandler constructor. Use "minimumSSLProtocol" static property instead.
