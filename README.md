@@ -6,7 +6,7 @@ Available on NuGet: https://www.nuget.org/packages/modernhttpclient-updated/ [![
 This library brings the latest platform-specific networking libraries to
 Xamarin applications via a custom HttpClient handler. Write your app using
 System.Net.Http, but drop this library in and it will go drastically faster.
-This is made possible by two native libraries:
+This is made possible by:
 
 * On iOS, [NSURLSession](https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSession_class/Introduction/Introduction.html)
 * On Android, via [OkHttp3](http://square.github.io/okhttp/)
@@ -14,17 +14,21 @@ This is made possible by two native libraries:
 
 ## How can I use this from shared code?
 
-Just reference the Portable version of ModernHttpClient in your Portable or .Net Standard Library, and it will use the correct version on all platforms.
+Just reference the portable version of ModernHttpClient in your .Net Standard Library, and it will use the correct version on all platforms.
 
 ## Usage
 
-The good news is, you don't have to know either of these two libraries above,
-using ModernHttpClient is the most boring thing in the world.
+The good news is, you don't have to know either of these two libraries above.
 
 Here's how it works:
 
 ```cs
-private static HttpClient httpClient = new HttpClient(new NativeMessageHandler() { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true, DisableCaching = true });
+var messageHandler = new NativeMessageHandler() {
+    Timeout = new TimeSpan(0,0,9),
+    EnableUntrustedCertificates = true,
+    DisableCaching = true
+};
+private static HttpClient httpClient = new HttpClient(messageHandler);
 ```
 
 ## NativeCookieHandler methods
@@ -43,7 +47,12 @@ SetCookie before making the http call and they will be added to Cookie header in
 
 ```cs
 var cookieHandler = new NativeCookieHandler();
-private static HttpClient httpClient = new HttpClient(new NativeMessageHandler(false, false, cookieHandler) { Timeout = new TimeSpan(0,0,9), EnableUntrustedCertificates = true });
+var messageHandler = new NativeMessageHandler(false, false, cookieHandler) {
+    Timeout = new TimeSpan(0,0,9),
+    EnableUntrustedCertificates = true,
+    DisableCaching = true
+};
+private static HttpClient httpClient = new HttpClient(messageHandler);
 
 var cookie = new Cookie("cookie1", "value1", "/", "self-signed.badssl.com");
 cookieHandler.SetCookie(cookie);
@@ -53,7 +62,7 @@ var response = await client.GetAsync(new Uri("https://self-signed.badssl.com"));
 
 ## Self-signed certificates
 
-Set EnableUntrustedCertificates to true to support self-signed certificates.
+Set EnableUntrustedCertificates to true to support self-signed certificates, this is intended for testing environments.
 
 To make it work in iOS, add this to your info.plist:
 
@@ -71,12 +80,50 @@ To make it work in iOS, add this to your info.plist:
 </dict>
 ```
 
+## Hostname Verifier Callback (Android)
+
+Hostname Verifier callback parameter has been removed from NativeMessageHandler constructor. Use "verifyHostnameCallback" static property instead.
+
+At your Android project and before creating the NativeMessageHandler instance:
+
+```cs
+NativeMessageHandler.verifyHostnameCallback = (hostname, session) =>
+{
+    // Do something or
+    return true;
+};
+```
+
+## Minimum SSL Protocol (iOS)
+
+Minimum SSL Protocol parameter has been removed from NativeMessageHandler constructor. Use "minimumSSLProtocol" static property instead.
+
+At your iOS project and before creating the NativeMessageHandler instance:
+
+```cs
+NativeMessageHandler.minimumSSLProtocol = SslProtocol.Tls_1_2;
+```
+
+System.Net.ServicePointManager.SecurityProtocol provides a mechanism for specifying supported protocol types for System.Net. Since iOS only provides an API for a minimum and maximum protocol we are not able to port this configuration directly and instead use the specified minimum value when one is specified.
+
 #### Release Notes
 
-2.7.0      
-[Update] Migrating to a multi-target project      
-[Android] Calling HttpClient methods should throw .Net Exception when fail #5      
-[Android] VerifyHostnameCallback parameter function on constructor (NativeMessageHandler - Android) when customSSLVerification is true #6      
+2.7.1
+
+[Android] MissingMethodException Method 'ModernHttpClient.NativeMessageHandler..ctor' not found. #9
+
+[iOS] Removing minimumSSLProtocol from NativeMessageHandler ctor
+
+[UWP] Exception on UWP with Xamarin Forms #3
+
+2.7.0
+      
+[Update] Migrating to a multi-target project
+      
+[Android] Calling HttpClient methods should throw .Net Exception when fail #5
+      
+[Android] VerifyHostnameCallback parameter function on constructor (NativeMessageHandler - Android) when customSSLVerification is true #6
+      
 [Android] ReasonPhrase is empty under HTTPS #8
 
 2.6.0
