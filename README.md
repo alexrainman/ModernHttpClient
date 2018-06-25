@@ -96,7 +96,7 @@ NativeMessageHandler.verifyHostnameCallback = (hostname, session) =>
 
 ## Custom SSL Socketfactory TrustManager (Android)
 
-Internally the plugin uses a custom X509TrustManager but if you want to use your own using your backend certificate, do this in your Android project MainActivity:
+Internally the plugin uses a custom X509TrustManager but to create one for your backend certificate, do this in your Android project MainActivity:
 
 ```cs
 var cf = CertificateFactory.GetInstance("X.509");
