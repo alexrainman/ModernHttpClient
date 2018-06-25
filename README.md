@@ -84,7 +84,7 @@ To make it work in iOS, add this to your info.plist:
 
 Hostname Verifier callback parameter has been removed from NativeMessageHandler constructor. Use "verifyHostnameCallback" static property instead.
 
-In your Android project and before creating the NativeMessageHandler instance:
+In your Android project MainActivity:
 
 ```cs
 NativeMessageHandler.verifyHostnameCallback = (hostname, session) =>
@@ -96,17 +96,40 @@ NativeMessageHandler.verifyHostnameCallback = (hostname, session) =>
 
 ## Custom SSL Socketfactory TrustManager (Android)
 
-Internally the plugin uses a custom X509TrustManager but if you want to use your own using your backend certificate, do this in your Android project and before creating the NativeMessageHandler instance:
+Internally the plugin uses a custom X509TrustManager but if you want to use your own using your backend certificate, do this in your Android project MainActivity:
 
 ```
+var cf = CertificateFactory.GetInstance("X.509");
+var cert = Resources.OpenRawResource(certResourceId);
+Certificate ca;
+try
+{
+      ca = cf.GenerateCertificate(cert);
+}
+finally
+{
+       cert.Close();
+}
 
+var keyStoreType = KeyStore.DefaultType;
+var keyStore = KeyStore.GetInstance(keyStoreType);
+keyStore.Load(null, null);
+keyStore.SetCertificateEntry("ca", ca);
+
+var tmfAlgorithm = TrustManagerFactory.DefaultAlgorithm;
+var tmf = TrustManagerFactory.GetInstance(tmfAlgorithm);
+tmf.Init(keyStore);
+
+var customTrustManager = tmf.GetTrustManagers()[0] as IX509TrustManager;
+
+NativeMessageHandler.customTrustManager = customTrustManager;
 ```
 
 ## Minimum SSL Protocol (iOS)
 
 Minimum SSL Protocol parameter has been removed from NativeMessageHandler constructor. Use "minimumSSLProtocol" static property instead.
 
-In your iOS project and before creating the NativeMessageHandler instance:
+In your iOS project AppDelegate:
 
 ```cs
 NativeMessageHandler.minimumSSLProtocol = SslProtocol.Tls_1_2;
@@ -115,6 +138,10 @@ NativeMessageHandler.minimumSSLProtocol = SslProtocol.Tls_1_2;
 System.Net.ServicePointManager.SecurityProtocol provides a mechanism for specifying supported protocol types for System.Net. Since iOS only provides an API for a minimum and maximum protocol we are not able to port this configuration directly and instead use the specified minimum value when one is specified.
 
 #### Release Notes
+
+2.7.2
+
+[Android] Handshake failed (adding customTrustManager static property) #11
 
 2.7.1
 
@@ -153,6 +180,20 @@ System.Net.ServicePointManager.SecurityProtocol provides a mechanism for specify
 2.5.0
 
 [Android] Updating to Square.OkHttp3
+
+2.4.9
+
+[Android] Calling HttpClient methods should throw .Net Exception when fail #5
+
+[Android] MissingMethodException Method 'ModernHttpClient.NativeMessageHandler..ctor' not found. #9
+
+[Android] VerifyHostnameCallback parameter function on constructor when customSSLVerification is true #6
+
+[Android] ReasonPhrase is empty under HTTPS #8
+
+[Android] Handshake failed (adding customTrustManager static property) #11
+
+[iOS] Removing minimumSSLProtocol from NativeMessageHandler ctor
 
 2.4.7
 
