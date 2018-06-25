@@ -98,7 +98,7 @@ NativeMessageHandler.verifyHostnameCallback = (hostname, session) =>
 
 Internally the plugin uses a custom X509TrustManager but if you want to use your own using your backend certificate, do this in your Android project MainActivity:
 
-```
+```cs
 var cf = CertificateFactory.GetInstance("X.509");
 var cert = Resources.OpenRawResource(certResourceId);
 Certificate ca;
