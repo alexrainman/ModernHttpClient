@@ -35,6 +35,7 @@ namespace ModernHttpClient
         public NativeMessageHandler() : this(false, false) {}
 
         public static Func<string, ISSLSession, bool> verifyHostnameCallback;
+        public static IX509TrustManager customTrustManager;
 
         public NativeMessageHandler(bool throwOnCaptiveNetwork, bool customSSLVerification, NativeCookieHandler cookieHandler = null)
         {
@@ -69,6 +70,9 @@ namespace ModernHttpClient
             client = clientBuilder.Build();
 
             noCacheCacheControl = (new CacheControl.Builder()).NoCache().Build();
+
+            // java.lang.NoSuchMethodError when proguard is turned on #12
+            //var call = Square.OkHttp3.RealCall.FromArray<int>(new[] { 0 });
         }
 
         public void RegisterForProgress(HttpRequestMessage request, ProgressDelegate callback)
@@ -119,9 +123,11 @@ namespace ModernHttpClient
             if (EnableUntrustedCertificates)
             {
                 // Install the all-trusting trust manager
+                var trustManager = customTrustManager ?? new CustomX509TrustManager();
+
                 var sslContext = SSLContext.GetInstance("SSL");
-                var trustManager = new CustomX509TrustManager();
                 sslContext.Init(null, new ITrustManager[] { trustManager }, new Java.Security.SecureRandom());
+
                 // Create an ssl socket factory with our all-trusting manager
                 var sslSocketFactory = sslContext.SocketFactory;
 
@@ -230,6 +236,10 @@ namespace ModernHttpClient
                 // Calling HttpClient methods should throw .Net Exception when fail #5
                 throw new HttpRequestException(ex.Message, ex);
             }
+            /*catch (Java.Lang.LinkageError ex)
+            {
+                throw new HttpRequestException(ex.Message, ex);
+            }*/
 
             var respBody = resp.Body();
 

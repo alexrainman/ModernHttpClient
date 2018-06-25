@@ -56,7 +56,7 @@ namespace ModernHttpClient
             // Add Cookie Header if any cookie for the domain in the cookie store
             var stringBuilder = new StringBuilder();
 
-            // TODO: check if CookieContainer is NativeCookieHandler
+            // check if CookieContainer is NativeCookieHandler
 
             var nativeCookieHandler = this.CookieContainer as NativeCookieHandler;
 

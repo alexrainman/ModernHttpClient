@@ -7,10 +7,10 @@
     <PackageId>modernhttpclient-updated</PackageId>
     
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
-    <AssemblyVersion>2.7.1</AssemblyVersion>
-    <AssemblyFileVersion>2.7.1</AssemblyFileVersion>
-    <Version>2.7.1</Version>
-    <PackageVersion>2.7.1</PackageVersion>
+    <AssemblyVersion>2.7.2</AssemblyVersion>
+    <AssemblyFileVersion>2.7.2</AssemblyFileVersion>
+    <Version>2.7.2</Version>
+    <PackageVersion>2.7.2</PackageVersion>
     <PackOnBuild>true</PackOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <LangVersion>default</LangVersion>
@@ -25,6 +25,8 @@
     <PackageProjectUrl>https://github.com/alexrainman/ModernHttpClient</PackageProjectUrl>
     <RepositoryUrl>https://github.com/alexrainman/ModernHttpClient</RepositoryUrl>
     <PackageReleaseNotes>
+      2.7.2
+      [Android] Handshake failed (adding customTrustManager static property) #11
       2.7.1
       [Android] MissingMethodException Method 'ModernHttpClient.NativeMessageHandler..ctor' not found. #9
       [iOS] Removing minimumSSLProtocol from NativeMessageHandler ctor
@@ -44,6 +46,13 @@
       [Update] Adding DeleteCookies, SetCookie and DeleteCookie to NativeCookieHandler
       2.5.0
       [Android] Updating to Square.OkHttp3
+      2.4.9
+      [Android] Calling HttpClient methods should throw .Net Exception when fail #5
+      [Android] MissingMethodException Method 'ModernHttpClient.NativeMessageHandler..ctor' not found. #9
+      [Android] VerifyHostnameCallback parameter function on constructor when customSSLVerification is true #6
+      [Android] ReasonPhrase is empty under HTTPS #8
+      [Android] Handshake failed (adding customTrustManager static property) #11
+      [iOS] Removing minimumSSLProtocol from NativeMessageHandler ctor
       2.4.7
       [Update] Cookies set with the native handler will be merged into the Cookie header
       2.4.5
