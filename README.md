@@ -84,7 +84,7 @@ To make it work in iOS, add this to your info.plist:
 
 Hostname Verifier callback parameter has been removed from NativeMessageHandler constructor. Use "verifyHostnameCallback" static property instead.
 
-At your Android project and before creating the NativeMessageHandler instance:
+In your Android project and before creating the NativeMessageHandler instance:
 
 ```cs
 NativeMessageHandler.verifyHostnameCallback = (hostname, session) =>
@@ -94,11 +94,19 @@ NativeMessageHandler.verifyHostnameCallback = (hostname, session) =>
 };
 ```
 
+## Custom SSL Socketfactory TrustManager (Android)
+
+Internally the plugin uses a custom X509TrustManager but if you want to use your own using your backend certificate, do this in your Android project and before creating the NativeMessageHandler instance:
+
+```
+
+```
+
 ## Minimum SSL Protocol (iOS)
 
 Minimum SSL Protocol parameter has been removed from NativeMessageHandler constructor. Use "minimumSSLProtocol" static property instead.
 
-At your iOS project and before creating the NativeMessageHandler instance:
+In your iOS project and before creating the NativeMessageHandler instance:
 
 ```cs
 NativeMessageHandler.minimumSSLProtocol = SslProtocol.Tls_1_2;
