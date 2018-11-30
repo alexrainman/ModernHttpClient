@@ -75,7 +75,7 @@ namespace ModernHttpClient
         {
         }
 
-        public NativeMessageHandler(bool throwOnCaptiveNetwork, bool customSSLVerification, WebProxy proxy = null, NativeCookieHandler cookieHandler = null)
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, bool customSSLVerification, WebProxy proxy, NativeCookieHandler cookieHandler = null)
         {
             var configuration = NSUrlSessionConfiguration.DefaultSessionConfiguration;
 
