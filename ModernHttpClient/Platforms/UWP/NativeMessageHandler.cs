@@ -19,6 +19,11 @@ namespace ModernHttpClient
         public NativeMessageHandler() : this(false, false) { }
 
         public NativeMessageHandler(bool throwOnCaptiveNetwork, bool customSSLVerification, NativeCookieHandler cookieHandler = null)
+            : this(throwOnCaptiveNetwork, customSSLVerification, null, cookieHandler)
+        {
+        }
+
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, bool customSSLVerification, WebProxy proxy, NativeCookieHandler cookieHandler = null)
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
             this.customSSLVerification = customSSLVerification;

@@ -71,8 +71,34 @@ namespace ModernHttpClient
         public static SslProtocol? minimumSSLProtocol;
 
         public NativeMessageHandler(bool throwOnCaptiveNetwork, bool customSSLVerification, NativeCookieHandler cookieHandler = null)
+            : this(throwOnCaptiveNetwork, customSSLVerification, null, cookieHandler)
+        {
+        }
+
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, bool customSSLVerification, WebProxy proxy = null, NativeCookieHandler cookieHandler = null)
         {
             var configuration = NSUrlSessionConfiguration.DefaultSessionConfiguration;
+
+            if (proxy != null)
+            {
+                NSObject[] values =
+                {
+
+                    NSObject.FromObject(proxy.Address.Host),
+                    NSNumber.FromInt32 (proxy.Address.Port),
+                    NSNumber.FromInt32 (1)
+                };
+
+                NSObject[] keys =
+                {
+                    NSObject.FromObject("HTTPProxy"),
+                    NSObject.FromObject("HTTPPort"),
+                    NSObject.FromObject("HTTPEnable")
+                };
+
+                NSDictionary proxyDict = NSDictionary.FromObjectsAndKeys(values, keys);
+                configuration.ConnectionProxyDictionary = proxyDict;
+            }
 
             // System.Net.ServicePointManager.SecurityProtocol provides a mechanism for specifying supported protocol types
             // for System.Net. Since iOS only provides an API for a minimum and maximum protocol we are not able to port

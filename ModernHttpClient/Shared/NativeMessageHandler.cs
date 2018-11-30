@@ -42,6 +42,24 @@ namespace ModernHttpClient
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see
+        /// cref="ModernHttpClient.NativeMessageHandler"/> class.
+        /// </summary>
+        /// <param name="throwOnCaptiveNetwork">If set to <c>true</c> throw on
+        /// captive network (ie: a captive network is usually a wifi network
+        /// where an authentication html form is shown instead of the real
+        /// content).</param>
+        /// <param name="customSSLVerification">Enable custom SSL certificate 
+        /// verification via ServicePointManager. Disabled by default for 
+        /// performance reasons (i.e. the OS default certificate verification 
+        /// will take place)</param>
+        /// <param name="cookieHandler">Enable native cookie handling.
+        /// </param>
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, bool customSSLVerification, WebProxy proxy, NativeCookieHandler cookieHandler = null) : base()
+        {
+        }
+
         public TimeSpan? Timeout
         {
             get { throw new Exception (wrongVersion); }
