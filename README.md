@@ -67,8 +67,8 @@ readonly static HttpClient client = new HttpClient(new NativeMessageHandler(fals
     },
     ClientCertificate = new ClientCertificate()
     {
-        Passphrase = "PFX_PASSPHRASE",
-        RawData = "PFX_DATA"
+        RawData = "PFX_DATA",
+        Passphrase = "PFX_PASSPHRASE"
     }
 })
 {
@@ -113,7 +113,28 @@ Certificate pinning failure!
 
 3. Follow up by pasting the public key hashes from the exception into the NativeMessageHandler certificate pinner's configuration.
 
-### How to
+### How to merger your certificate and its private key into a pfx and convert it to Base64?
+
+A certificate in pfx format can be created from client.crt, client.key and a passphrase using openssl:
+
+```
+openssl pkcs12 -export -out client.pfx -inkey client.key -in client.crt
+```
+
+A client.crt can be created following this tutorial: https://gist.github.com/mtigas/952344
+
+The pfx certificate can be converted to Base64 using PowerShell:
+
+```
+$fileContentBytes = get-content 'path-to\client.pfx' -Encoding Byte
+[System.Convert]::ToBase64String($fileContentBytes) | Out-File 'path-to\pfx-bytes.txt'
+```
+
+Or, from a terminal window on a Mac:
+
+```
+base64 -i path-to/client.pfx -o path-to/pfx-bytes.txt
+```
 
 ### How to use NativeCookieHandler?
 
@@ -139,8 +160,8 @@ readonly static HttpClient client = new HttpClient(new NativeMessageHandler(fals
     },
     ClientCertificate = new ClientCertificate()
     {
-        Passphrase = "PFX_PASSPHRASE",
-        RawData = "PFX_DATA"
+        RawData = "PFX_DATA",
+        Passphrase = "PFX_PASSPHRASE"
     }
 }, cookieHandler)
 {
