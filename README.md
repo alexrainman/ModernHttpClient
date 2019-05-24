@@ -17,9 +17,29 @@ This is made possible by:
 
 Just reference the portable version of ModernHttpClient in your .Net Standard or Portable Library, and it will use the correct version on all platforms.
 
-## WHAT'S NEW?
+## What's new?
 
+This release is focused on security so, the original code has been refactored, removing deprecated APIs to meet the new standards.
 
+Support for untrusted certificates has been removed. Using untrusted certificates is considered a security flaw.
+
+https://www.globalsign.com/en/ssl-information-center/dangers-self-signed-certificates/
+
+You can get a valid SSL certificate for free from one of these certificate authorities:
+
+https://www.sslforfree.com
+
+https://letsencrypt.org/getting-started/
+
+https://ssl.comodo.com/free-ssl-certificate.php
+
+TLS 1.2 has been enforced.
+
+Read why here:
+
+https://www.brillianceweb.com/resources/answers-to-7-common-questions-about-upgrading-to-tls-1.2/
+
+Really "modernizing" the way ModernHttpClient pin server certificates and adding support for client certificates (Mutual TLS Authentication).
 
 ## Usage
 
@@ -112,11 +132,11 @@ Code refactoring.
 
 Focused on security.
 
-Adding support for 2-way certificate pinning (Mutual TLS Authentication)
+Removing support for untrusted certificates.
 
 Enforcing TLS1.2
 
-Removing support for untrusted certificates.
+Adding support for 2-way certificate pinning (Mutual TLS Authentication)
 
 [iOS] Removing minimumSSLProtocol static property.
 
