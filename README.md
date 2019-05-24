@@ -21,7 +21,9 @@ Just reference ModernHttpClient in your .Net Standard or Portable Library, and i
 
 This release is focused on security so, the original code has been refactored to remove deprecated APIs and meet the new standards.
 
-Support for untrusted certificates has been removed. Using untrusted certificates is considered a security flaw.
+Support for untrusted certificates has been removed.
+
+Using untrusted certificates is considered a security flaw.
 
 https://www.globalsign.com/en/ssl-information-center/dangers-self-signed-certificates/
 
