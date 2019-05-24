@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <version>3.0.0</version>
+    <authors>Alex Rainman</authors>
+    <owners>Alex Rainman</owners>
+    <licenseUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/alexrainman/ModernHttpClient</projectUrl>
+    <id>modernhttpclient-updated</id>
+    <title>ModernHttpClient</title>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Write your app using System.Net.Http, but drop this library in and it will go securily faster.</description>
+    <summary>Write your app using System.Net.Http, but drop this library in and it will go securily faster.</summary>
+    <copyright>Copyright Alex Rainman © 2019</copyright>
+    <PackageIconUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/download.png</PackageIconUrl>
+    <releaseNotes>
+3.0.0
+Code refactoring.
+Focused on security.
+Adding support for 2-way certificate pinning (Mutual TLS Authentication)
+Enforcing TLS1.2
+Removing support for untrusted certificates.
+[iOS] Removing minimumSSLProtocol static property.
+[Android] Removing verifyHostnameCallback static property.
+[Android] Removing customTrustManager static property.
+2.7.2 
+[Android] Handshake failed (adding customTrustManager static property) #11
+2.7.1
+[Android] MissingMethodException Method 'ModernHttpClient.NativeMessageHandler..ctor' not found. #9
+[iOS] Removing minimumSSLProtocol from NativeMessageHandler ctor
+[UWP] Exception on UWP with Xamarin Forms #3
+2.7.0
+[Update] Migrating to a multi-target project
+[Android] Calling HttpClient methods should throw .Net Exception when fail #5
+[Android] VerifyHostnameCallback parameter function on constructor (NativeMessageHandler - Android) when customSSLVerification is true #6
+[Android] ReasonPhrase is empty under HTTPS #8
+2.6.0
+[Update] Adding support for UWP
+[Update] Adding support for netstandard 2.0
+2.5.3
+[Update] Cookies set with the native handler will be merged into the Cookie header
+2.5.1
+[Android] NativeCookieHandler, if provided, is set as the default CookieJar for OkHttpClient
+[Update] Adding DeleteCookies, SetCookie and DeleteCookie to NativeCookieHandler
+2.5.0
+[Android] Updating to Square.OkHttp3
+2.4.7
+[Update] Cookies set with the native handler will be merged into the Cookie header
+2.4.5
+[Android] NativeCookieHandler, if provided, is set as the default cookie handler for OkHttpClient
+[Update] Adding DeleteCookies, SetCookie and DeleteCookie to NativeCookieHandler
+2.4.4
+[Android] SIGABRT after UnknownHostException #229
+[iOS] Updating obsolete NSUrlSessionDelegate to INSUrlSessionDelegate
+[Update] Adding EnableUntrustedCertificates to support self-signed certificates
+2.4.3
+[Update] Adding Timeout property
+[Android] Updating to Square.OkHttp 2.7.5
+[Android] Timeout value is not respected on Android #192
+        </releaseNotes>
+    <dependencies>
+      <group targetFramework="MonoAndroid">
+        <dependency id="Square.OkHttp3" version="3.8.1" />
+      </group>
+      <group targetFramework="Xamarin.iOS10">
+        <dependency id="BouncyCastle" version="1.8.4" />
+      </group>
+      <group targetFramework="UAP10">
+        <dependency id="Microsoft.NETCore.UniversalWindowsPlatform" version="6.2.8" />
+        <dependency id="Portable.BouncyCastle-Signed" version="1.7.0.2" />
+      </group>
+    </dependencies>
+  </metadata>
+
+  <files>
+    <!-- NetStandard -->
+    <file src="lib/netstandard2.0/ModernHttpClient.dll" target="lib/netstandard2.0/ModernHttpClient.dll" />
+
+    <!-- Xamarin.iOS -->
+    <file src="lib/iOS/ModernHttpClient.dll" target="lib/Xamarin.iOS10/ModernHttpClient.dll" />
+
+    <!-- Xamarin.Android -->
+    <file src="lib/Android/ModernHttpClient.dll" target="lib/MonoAndroid/ModernHttpClient.dll" />
+
+    <!-- UWP -->
+    <file src="lib/UWP/ModernHttpClient.dll" target="lib/UAP10/ModernHttpClient.dll" />
+    <file src="lib/UWP/ModernHttpClient.pri" target="lib/UAP10/ModernHttpClient.pri" />
+
+    <!-- PCL -->
+    <file src="lib/Portable/ModernHttpClient.dll" target="lib/portable-net45+win8+wpa81/ModernHttpClient.dll" />
+
+  </files>
+</package>

@@ -5,6 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Class1.cs" />
+    <ProjectReference Include="..\ModernHttpClient\ModernHttpClient.csproj" />
   </ItemGroup>
 </Project>
