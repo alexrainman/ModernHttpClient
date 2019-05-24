@@ -113,7 +113,7 @@ Certificate pinning failure!
 
 3. Follow up by pasting the public key hashes from the exception into the NativeMessageHandler certificate pinner's configuration.
 
-### How to merger your certificate and its private key into a pfx and convert it to Base64?
+### Client certificate as Base64
 
 A certificate in pfx format can be created from client.crt, client.key and a passphrase using openssl:
 
