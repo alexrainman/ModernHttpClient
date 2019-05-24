@@ -5,7 +5,8 @@ Available on NuGet: https://www.nuget.org/packages/modernhttpclient-updated/ [![
 
 This library brings the latest platform-specific networking libraries to
 Xamarin applications via a custom HttpClient handler. Write your app using
-System.Net.Http, but drop this library in and it will go drastically faster.
+System.Net.Http, but drop this library in and it will go securely faster.
+
 This is made possible by:
 
 * On iOS, [NSURLSession](https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSession_class/Introduction/Introduction.html)
@@ -14,21 +15,83 @@ This is made possible by:
 
 ## How can I use this from shared code?
 
-Just reference the portable version of ModernHttpClient in your .Net Standard Library, and it will use the correct version on all platforms.
+Just reference the portable version of ModernHttpClient in your .Net Standard or Portable Library, and it will use the correct version on all platforms.
+
+## WHAT'S NEW?
+
+
 
 ## Usage
 
-The good news is, you don't have to know either of these two libraries above.
+The good news is, you don't have to know either of these libraries above.
 
 Here's how it works:
 
 ```cs
-var messageHandler = new NativeMessageHandler() {
-    Timeout = new TimeSpan(0,0,9),
-    EnableUntrustedCertificates = true,
-    DisableCaching = true
-};
-private static HttpClient httpClient = new HttpClient(messageHandler);
+readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new CustomSSLVerification()
+{
+    Pins = new List<Pin>()
+    {
+        new Pin()
+        {
+            Hostname = "reqres.in",
+            PublicKeys = new []
+            {
+                "sha256/CZEvkurQ3diX6pndH4Z5/dUNzK1Gm6+n8Hdx/DQgjO0=",
+                "sha256/x9SZw6TwIqfmvrLZ/kz1o0Ossjmn728BnBKpUFqGNVM=",
+                "sha256/58qRu/uxh4gFezqAcERupSkRYBlBAvfcw7mEjGPLnNU="
+            }
+        }
+    },
+    ClientCertificate = new ClientCertificate()
+    {
+        Passphrase = "PFX_PASSPHRASE",
+        RawData = "PFX_DATA"
+    }
+})
+{
+    DisableCaching = true,
+    Timeout = new TimeSpan(0, 0, 9)
+});
+```
+
+### How to use NativeCookieHandler?
+
+SetCookie before making the http call and they will be added to Cookie header in the native client:
+
+```cs
+NativeCookieHandler cookieHandler = new NativeCookieHandler();
+
+readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new CustomSSLVerification()
+{
+    Pins = new List<Pin>()
+    {
+        new Pin()
+        {
+            Hostname = "reqres.in",
+            PublicKeys = new []
+            {
+                "sha256/CZEvkurQ3diX6pndH4Z5/dUNzK1Gm6+n8Hdx/DQgjO0=",
+                "sha256/x9SZw6TwIqfmvrLZ/kz1o0Ossjmn728BnBKpUFqGNVM=",
+                "sha256/58qRu/uxh4gFezqAcERupSkRYBlBAvfcw7mEjGPLnNU="
+            }
+        }
+    },
+    ClientCertificate = new ClientCertificate()
+    {
+        Passphrase = "PFX_PASSPHRASE",
+        RawData = "PFX_DATA"
+    }
+}, cookieHandler)
+{
+    DisableCaching = true,
+    Timeout = new TimeSpan(0, 0, 9)
+});
+
+var cookie = new Cookie("cookie1", "value1", "/", "reqres.in");
+cookieHandler.SetCookie(cookie);
+
+var response = await client.GetAsync(new Uri("https://reqres.in"));
 ```
 
 ## NativeCookieHandler methods
@@ -41,103 +104,25 @@ private static HttpClient httpClient = new HttpClient(messageHandler);
 
 ```DeleteCookie(Cookie cookie)```: delete a native cookie.
 
-### How to use NativeCookieHandler?
-
-SetCookie before making the http call and they will be added to Cookie header in the native client:
-
-```cs
-var cookieHandler = new NativeCookieHandler();
-var messageHandler = new NativeMessageHandler(false, false, cookieHandler) {
-    Timeout = new TimeSpan(0,0,9),
-    EnableUntrustedCertificates = true,
-    DisableCaching = true
-};
-private static HttpClient httpClient = new HttpClient(messageHandler);
-
-var cookie = new Cookie("cookie1", "value1", "/", "self-signed.badssl.com");
-cookieHandler.SetCookie(cookie);
-
-var response = await client.GetAsync(new Uri("https://self-signed.badssl.com"));
-```
-
-## Self-signed certificates
-
-Set EnableUntrustedCertificates to true to support self-signed certificates, this is intended for testing environments.
-
-To make it work in iOS, add this to your info.plist:
-
-```xml
-<key>NSAppTransportSecurity</key>
-<dict>
-    <key>NSExceptionDomains</key>
-    <dict>
-        <key>your-self-signed.badssl.com</key>
-        <dict>
-            <key>NSExceptionAllowsInsecureHTTPLoads</key>
-            <true/>
-        </dict>
-    </dict>
-</dict>
-```
-
-## Hostname Verifier Callback (Android)
-
-Hostname Verifier callback parameter has been removed from NativeMessageHandler constructor. Use "verifyHostnameCallback" static property instead.
-
-In your Android project MainActivity:
-
-```cs
-NativeMessageHandler.verifyHostnameCallback = (hostname, session) =>
-{
-    // Do something or
-    return true;
-};
-```
-
-## Custom SSL Socketfactory TrustManager (Android)
-
-Internally the plugin uses a custom X509TrustManager but to create one for your backend certificate, do this in your Android project MainActivity:
-
-```cs
-var cf = CertificateFactory.GetInstance("X.509");
-var cert = Resources.OpenRawResource(certResourceId);
-Certificate ca;
-try
-{
-      ca = cf.GenerateCertificate(cert);
-}
-finally
-{
-       cert.Close();
-}
-
-var keyStoreType = KeyStore.DefaultType;
-var keyStore = KeyStore.GetInstance(keyStoreType);
-keyStore.Load(null, null);
-keyStore.SetCertificateEntry("ca", ca);
-
-var tmfAlgorithm = TrustManagerFactory.DefaultAlgorithm;
-var tmf = TrustManagerFactory.GetInstance(tmfAlgorithm);
-tmf.Init(keyStore);
-
-var customTrustManager = tmf.GetTrustManagers()[0] as IX509TrustManager;
-
-NativeMessageHandler.customTrustManager = customTrustManager;
-```
-
-## Minimum SSL Protocol (iOS)
-
-Minimum SSL Protocol parameter has been removed from NativeMessageHandler constructor. Use "minimumSSLProtocol" static property instead.
-
-In your iOS project AppDelegate:
-
-```cs
-NativeMessageHandler.minimumSSLProtocol = SslProtocol.Tls_1_2;
-```
-
-System.Net.ServicePointManager.SecurityProtocol provides a mechanism for specifying supported protocol types for System.Net. Since iOS only provides an API for a minimum and maximum protocol we are not able to port this configuration directly and instead use the specified minimum value when one is specified.
-
 #### Release Notes
+
+3.0.0
+
+Code refactoring.
+
+Focused on security.
+
+Adding support for 2-way certificate pinning (Mutual TLS Authentication)
+
+Enforcing TLS1.2
+
+Removing support for untrusted certificates.
+
+[iOS] Removing minimumSSLProtocol static property.
+
+[Android] Removing verifyHostnameCallback static property.
+
+[Android] Removing customTrustManager static property.
 
 2.7.2
 
