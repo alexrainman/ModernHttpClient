@@ -19,7 +19,7 @@ Just reference ModernHttpClient in your .Net Standard or Portable Library, and i
 
 ## What's new?
 
-This release is focused on security so, the original code has been refactored to remove deprecated APIs to meet the new standards.
+This release is focused on security so, the original code has been refactored to remove deprecated APIs and meet the new standards.
 
 Support for untrusted certificates has been removed. Using untrusted certificates is considered a security flaw.
 
