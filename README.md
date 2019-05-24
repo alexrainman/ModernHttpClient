@@ -41,6 +41,8 @@ https://www.brillianceweb.com/resources/answers-to-7-common-questions-about-upgr
 
 Really "modernizing" the way ModernHttpClient pin server certificates and adding support for client certificates (Mutual TLS Authentication).
 
+As a result, minimumSSLProtocol static property has been removed from iOS, verifyHostnameCallback and customTrustManager static properties has been removed from Android.
+
 ## Usage
 
 The good news is, you don't have to know either of these libraries above.
