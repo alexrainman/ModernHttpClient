@@ -17,7 +17,7 @@ This is made possible by:
 
 Just reference ModernHttpClient in your .Net Standard or Portable Library, and it will use the correct version on all platforms.
 
-## What's new?
+### What's new?
 
 This release is focused on security so, the original code has been refactored to remove deprecated APIs and meet the new standards.
 
@@ -39,11 +39,11 @@ Read why here:
 
 https://www.brillianceweb.com/resources/answers-to-7-common-questions-about-upgrading-to-tls-1.2/
 
-Really "modernizing" the way ModernHttpClient pin server certificates and adding support for client certificates (Mutual TLS Authentication).
+Really "modernizing" the way ModernHttpClient implements certificate pinning, using server certificate chain public keys and adding support for client certificates, for a 2-Way Certificate Pinning (or what is also called Mutual TLS Authentication).
 
 As a result, minimumSSLProtocol static property has been removed from iOS, verifyHostnameCallback and customTrustManager static properties has been removed from Android.
 
-## Usage
+### Usage
 
 The good news is, you don't have to know either of these libraries above.
 
@@ -76,6 +76,44 @@ readonly static HttpClient client = new HttpClient(new NativeMessageHandler(fals
     Timeout = new TimeSpan(0, 0, 9)
 });
 ```
+
+### How to obtain server certificate chain public keys?
+
+1. In your Android project add Square.OkHttp3 Nuget Package.
+2. In your Main Activity, add a button and on its click event run this code:
+
+```cs
+var hostname = "reqres.in";
+var certificatePinner = new Square.OkHttp3.CertificatePinner.Builder()
+    .Add(hostname, "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+    .Build();
+var client = new OkHttpClient.Builder()
+    .CertificatePinner(certificatePinner)
+    .Build();
+ 
+var request = new Request.Builder()
+    .Url("https://" + hostname)
+    .Build();
+ 
+var call = client.NewCall(request);
+var response = await call.ExecuteAsync();
+```
+
+As expected, this fails with a certificate pinning exception:
+
+```cs
+Certificate pinning failure!
+  Peer certificate chain:
+    sha256/CZEvkurQ3diX6pndH4Z5/dUNzK1Gm6+n8Hdx/DQgjO0=: CN=sni96286.cloudflaressl.com,OU=PositiveSSL Multi-Domain,OU=Domain Control Validated
+    sha256/x9SZw6TwIqfmvrLZ/kz1o0Ossjmn728BnBKpUFqGNVM=: CN=COMODO ECC Domain Validation Secure Server CA 2,O=COMODO CA Limited,L=Salford,ST=Greater Manchester,C=GB
+    sha256/58qRu/uxh4gFezqAcERupSkRYBlBAvfcw7mEjGPLnNU=: CN=COMODO ECC Certification Authority,O=COMODO CA Limited,L=Salford,ST=Greater Manchester,C=GB
+  Pinned certificates for reqres.in:
+    sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+```
+
+3. Follow up by pasting the public key hashes from the exception into the NativeMessageHandler certificate pinner's configuration.
+
+### How to
 
 ### How to use NativeCookieHandler?
 
