@@ -117,10 +117,10 @@ Certificate pinning failure!
 
 ### Client certificate as Base64
 
-A certificate in pfx format can be created from client.crt, client.key and a passphrase using openssl:
+A certificate in pfx format can be created from client.crt, server.key and a passphrase using openssl:
 
 ```
-openssl pkcs12 -export -out client.pfx -inkey client.key -in client.crt
+openssl pkcs12 -export -out client.pfx -inkey server.key -in client.crt
 ```
 
 A client.crt can be created following this tutorial: https://gist.github.com/mtigas/952344
