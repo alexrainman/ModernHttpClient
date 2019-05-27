@@ -1,4 +1,4 @@
-Modernizing Paul Betts ModernHttpClient
+ModernHttpClient
 ================
 
 Available on NuGet: https://www.nuget.org/packages/modernhttpclient-updated/ [![NuGet](https://img.shields.io/nuget/v/modernhttpclient-updated.svg?label=NuGet)](https://www.nuget.org/packages/modernhttpclient-updated/)
