@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
     <authors>Alex Rainman</authors>
     <owners>Alex Rainman</owners>
     <licenseUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/LICENSE</licenseUrl>
@@ -12,8 +12,10 @@
     <description>Write your app using System.Net.Http, but drop this library in and it will go securily faster.</description>
     <summary>Write your app using System.Net.Http, but drop this library in and it will go securily faster.</summary>
     <copyright>Copyright Alex Rainman © 2019</copyright>
-    <PackageIconUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/download.png</PackageIconUrl>
+    <iconUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/download.png</iconUrl>
     <releaseNotes>
+3.0.1
+[iOS] Changing BouncyCastle dependency to Portable.BouncyCastle
 3.0.0
 Code refactoring.
 Focused on security.
@@ -63,7 +65,7 @@ Removing support for untrusted certificates.
         <dependency id="Square.OkHttp3" version="3.8.1" />
       </group>
       <group targetFramework="Xamarin.iOS10">
-        <dependency id="BouncyCastle" version="1.8.4" />
+        <dependency id="Portable.BouncyCastle" version="1.8.5" />
       </group>
       <group targetFramework="UAP10">
         <dependency id="Microsoft.NETCore.UniversalWindowsPlatform" version="6.2.8" />
