@@ -52,6 +52,8 @@ namespace ModernHttpClient
 
         private NSUrlCredential UrlCredential;
 
+        public NativeMessageHandler() : this(false, new CustomSSLVerification()) { }
+
         public NativeMessageHandler(bool throwOnCaptiveNetwork, CustomSSLVerification customSSLVerification, NativeCookieHandler cookieHandler = null)
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
