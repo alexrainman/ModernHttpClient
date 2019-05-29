@@ -38,6 +38,8 @@ namespace ModernHttpClient
 
         private IKeyManager[] KeyManagers;
 
+        public NativeMessageHandler() : this(false, new CustomSSLVerification()) { }
+
         public NativeMessageHandler(bool throwOnCaptiveNetwork, CustomSSLVerification customSSLVerification, NativeCookieHandler cookieHandler = null)
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;

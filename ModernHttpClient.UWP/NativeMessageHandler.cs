@@ -21,6 +21,8 @@ namespace ModernHttpClient
         public TimeSpan? Timeout { get; set; }
 
         private readonly CertificatePinner CertificatePinner;
+		
+		public NativeMessageHandler() : this(false, new CustomSSLVerification()) { }
 
         public NativeMessageHandler(bool throwOnCaptiveNetwork, CustomSSLVerification customSSLVerification, NativeCookieHandler cookieHandler = null)
         {
