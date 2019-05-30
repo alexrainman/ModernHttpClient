@@ -189,6 +189,14 @@ var response = await client.GetAsync(new Uri("https://reqres.in"));
 
 #### Release Notes
 
+3.0.2
+
+Method not found: void ModernHttpClient.NativeMessageHandler..ctor()
+
+3.0.1
+
+[iOS] Changing BouncyCastle dependency to Portable.BouncyCastle
+
 3.0.0
 
 Code refactoring.
