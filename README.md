@@ -187,7 +187,45 @@ var response = await client.GetAsync(new Uri("https://reqres.in"));
 
 ```DeleteCookie(Cookie cookie)```: delete a native cookie.
 
+## How to use a Web Proxy?
+
+A four parameter has been added to the NativeMessageHandler to support Web Proxies:
+
+```cs
+readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new CustomSSLVerification()
+{
+    Pins = new List<Pin>()
+    {
+        new Pin()
+        {
+            Hostname = "reqres.in",
+            PublicKeys = new []
+            {
+                "sha256/CZEvkurQ3diX6pndH4Z5/dUNzK1Gm6+n8Hdx/DQgjO0=",
+                "sha256/x9SZw6TwIqfmvrLZ/kz1o0Ossjmn728BnBKpUFqGNVM=",
+                "sha256/58qRu/uxh4gFezqAcERupSkRYBlBAvfcw7mEjGPLnNU="
+            }
+        }
+    },
+    ClientCertificate = new ClientCertificate()
+    {
+        RawData = "PFX_DATA",
+        Passphrase = "PFX_PASSPHRASE"
+    }
+},
+cookieHandler,
+new System.Net.WebProxy("127.0.0.1:80", false))
+{
+    DisableCaching = true,
+    Timeout = new TimeSpan(0, 0, 9)
+});
+```
+
 #### Release Notes
+
+3.1.0
+
+Adding support for web proxy.
 
 3.0.2
 
