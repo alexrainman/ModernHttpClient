@@ -9,8 +9,8 @@
     <id>modernhttpclient-updated</id>
     <title>ModernHttpClient</title>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Write your app using System.Net.Http, but drop this library in and it will go securily faster.</description>
-    <summary>Write your app using System.Net.Http, but drop this library in and it will go securily faster.</summary>
+    <description>This library brings the latest platform-specific networking libraries to Xamarin applications via a custom HttpClient handler.</description>
+    <summary>This library brings the latest platform-specific networking libraries to Xamarin applications via a custom HttpClient handler.</summary>
     <copyright>Copyright Alex Rainman © 2019</copyright>
     <iconUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/download.png</iconUrl>
     <releaseNotes>
