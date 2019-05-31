@@ -26,7 +26,7 @@ namespace Demo.Droid
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.Main);
 
-            //var vm = new MainViewModel();
+            var vm = new MainViewModel();
 
             Button button = FindViewById<Button>(Resource.Id.myButton);
 
@@ -35,7 +35,7 @@ namespace Demo.Droid
                 // The easiest way to pin a host is turn on pinning with a broken configuration and read the expected configuration when the connection fails.
                 // Be sure to do this on a trusted network, and without man -in-the - middle tools like Charles or Fiddler.
 
-                var hostname = "reqres.in";
+                /*var hostname = "reqres.in";
 
                 var certificatePinner = new Square.OkHttp3.CertificatePinner.Builder()
                     .Add(hostname, "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
@@ -51,7 +51,7 @@ namespace Demo.Droid
 
                 var call = client.NewCall(request);
 
-                var response = await call.ExecuteAsync();
+                var response = await call.ExecuteAsync();*/
 
                 // As expected, this fails with a certificate pinning exception:
 
@@ -65,7 +65,7 @@ namespace Demo.Droid
 
                 // Follow up by pasting the public key hashes from the exception into the NativeMessageHandler certificate pinner's configuration.
 
-                //await vm.Get();
+                await vm.Get();
             };
         }
     }

@@ -54,7 +54,7 @@ namespace ModernHttpClient
 
         public NativeMessageHandler() : this(false, new CustomSSLVerification()) { }
 
-        public NativeMessageHandler(bool throwOnCaptiveNetwork, CustomSSLVerification customSSLVerification, NativeCookieHandler cookieHandler = null)
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, CustomSSLVerification customSSLVerification, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
 
@@ -74,10 +74,33 @@ namespace ModernHttpClient
 
             SetClientCertificate(customSSLVerification.ClientCertificate);
 
+            // NSUrlSessionConfiguration.DefaultSessionConfiguration uses the default NSHttpCookieStorage.SharedStorage
+
+            // PR: Proxy has been supported on iOS #19
+            if (proxy != null && proxy is WebProxy)
+            {
+                var webProxy = proxy as WebProxy;
+
+                NSObject[] values =
+                {
+                    NSObject.FromObject(webProxy.Address.Host),
+                    NSNumber.FromInt32 (webProxy.Address.Port),
+                    NSNumber.FromInt32 (1)
+                };
+
+                NSObject[] keys =
+                {
+                    NSObject.FromObject("HTTPSProxy"),
+                    NSObject.FromObject("HTTPSPort"),
+                    NSObject.FromObject("HTTPSEnable")
+                };
+
+                NSDictionary proxyDict = NSDictionary.FromObjectsAndKeys(values, keys);
+                configuration.ConnectionProxyDictionary = proxyDict;
+            }
+
             var urlSessionDelegate = new DataTaskDelegate(this);
             session = NSUrlSession.FromConfiguration(configuration, (INSUrlSessionDelegate)urlSessionDelegate, null);
-
-            // NSUrlSessionConfiguration.DefaultSessionConfiguration uses the default NSHttpCookieStorage.SharedStorage
         }
 
         private void SetClientCertificate(ClientCertificate certificate)

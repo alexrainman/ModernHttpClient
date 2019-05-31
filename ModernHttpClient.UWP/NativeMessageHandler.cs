@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Security;
@@ -24,7 +25,7 @@ namespace ModernHttpClient
 
         public NativeMessageHandler() : this(false, new CustomSSLVerification()) { }
 
-        public NativeMessageHandler(bool throwOnCaptiveNetwork, CustomSSLVerification customSSLVerification, NativeCookieHandler cookieHandler = null)
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, CustomSSLVerification customSSLVerification, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
 
@@ -58,6 +59,13 @@ namespace ModernHttpClient
             {
                 this.CookieContainer = cookieHandler;
             }
+
+            // Adding proxy support
+            if (proxy != null)
+            {
+                Proxy = proxy;
+                UseProxy = true;
+            }
         }
 
         private async void SetClientCertificate(ClientCertificate certificate)
@@ -76,13 +84,6 @@ namespace ModernHttpClient
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            // Set Timeout
-            if (this.Timeout != null)
-            {
-                var source = new CancellationTokenSource(Timeout.Value);
-                cancellationToken = source.Token;
-            }
-
             // Disable caching
             if (this.DisableCaching)
             {
@@ -124,6 +125,13 @@ namespace ModernHttpClient
 
                 if (stringBuilder.Length > 0)
                     request.Headers.Set("Cookie", stringBuilder.ToString().TrimEnd(';'));
+            }
+
+            // Set Timeout
+            if (this.Timeout != null)
+            {
+                var source = new CancellationTokenSource(Timeout.Value);
+                cancellationToken = source.Token;
             }
 
             var response = await base.SendAsync(request, cancellationToken);

@@ -1,20 +1,20 @@
-using Android.OS;
-using Java.IO;
-using Java.Security;
-using Java.Util.Concurrent;
-using Javax.Net.Ssl;
-using Square.OkHttp3;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Security;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Android.OS;
+using Java.IO;
+using Java.Net;
+using Java.Security;
+using Java.Util.Concurrent;
+using Javax.Net.Ssl;
+using Square.OkHttp3;
 
 namespace ModernHttpClient
 {
@@ -40,7 +40,7 @@ namespace ModernHttpClient
 
         public NativeMessageHandler() : this(false, new CustomSSLVerification()) { }
 
-        public NativeMessageHandler(bool throwOnCaptiveNetwork, CustomSSLVerification customSSLVerification, NativeCookieHandler cookieHandler = null)
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, CustomSSLVerification customSSLVerification, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
 
@@ -81,6 +81,17 @@ namespace ModernHttpClient
             }
 
             if (cookieHandler != null) clientBuilder.CookieJar(cookieHandler);
+
+            // Adding proxy support
+            if (proxy != null && proxy is WebProxy)
+            {
+                var webProxy = proxy as WebProxy;
+
+                var type = Java.Net.Proxy.Type.Http;
+                var address = new InetSocketAddress(webProxy.Address.Host, webProxy.Address.Port);
+                var jProxy = new Proxy(type, address);
+                clientBuilder.Proxy(jProxy);
+            }
 
             client = clientBuilder.Build();
         }
@@ -143,18 +154,6 @@ namespace ModernHttpClient
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var clientBuilder = client.NewBuilder();
-
-            if (Timeout != null)
-            {
-                var timeout = (long)Timeout.Value.TotalMilliseconds;
-                clientBuilder.ConnectTimeout(timeout, TimeUnit.Milliseconds);
-                clientBuilder.WriteTimeout(timeout, TimeUnit.Milliseconds);
-                clientBuilder.ReadTimeout(timeout, TimeUnit.Milliseconds);
-            }
-
-            client = clientBuilder.Build();
-
             var java_uri = request.RequestUri.GetComponents(UriComponents.AbsoluteUri, UriFormat.UriEscaped);
             var url = new Java.Net.URL(java_uri);
 
@@ -214,6 +213,16 @@ namespace ModernHttpClient
             if (stringBuilder.Length > 0)
             {
                 requestBuilder.AddHeader("Cookie", stringBuilder.ToString().TrimEnd(';'));
+            }
+
+            if (Timeout != null)
+            {
+                var clientBuilder = client.NewBuilder();
+                var timeout = (long)Timeout.Value.TotalMilliseconds;
+                clientBuilder.ConnectTimeout(timeout, TimeUnit.Milliseconds);
+                clientBuilder.WriteTimeout(timeout, TimeUnit.Milliseconds);
+                clientBuilder.ReadTimeout(timeout, TimeUnit.Milliseconds);
+                client = clientBuilder.Build();
             }
 
             cancellationToken.ThrowIfCancellationRequested();
