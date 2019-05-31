@@ -47,8 +47,6 @@ As a result, minimumSSLProtocol static property has been removed from iOS, verif
 
 ### Usage
 
-The good news is, you don't have to know either of the libraries above.
-
 Here's how it works:
 
 ```cs
