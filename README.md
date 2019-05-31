@@ -4,8 +4,7 @@ ModernHttpClient
 Available on NuGet: https://www.nuget.org/packages/modernhttpclient-updated/ [![NuGet](https://img.shields.io/nuget/v/modernhttpclient-updated.svg?label=NuGet)](https://www.nuget.org/packages/modernhttpclient-updated/)
 
 This library brings the latest platform-specific networking libraries to
-Xamarin applications via a custom HttpClient handler. Write your app using
-System.Net.Http, but drop this library in and it will go securely faster.
+Xamarin applications via a custom HttpClient handler.
 
 This is made possible by:
 
