@@ -165,7 +165,8 @@ readonly static HttpClient client = new HttpClient(new NativeMessageHandler(fals
         RawData = "PFX_DATA",
         Passphrase = "PFX_PASSPHRASE"
     }
-}, cookieHandler)
+},
+cookieHandler)
 {
     DisableCaching = true,
     Timeout = new TimeSpan(0, 0, 9)
