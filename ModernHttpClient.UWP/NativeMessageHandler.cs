@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -19,41 +20,36 @@ namespace ModernHttpClient
         readonly bool throwOnCaptiveNetwork;
 
         public bool DisableCaching { get; set; }
+        public bool EnableUntrustedCertificates { get; set; }
         public TimeSpan? Timeout { get; set; }
 
         private readonly CertificatePinner CertificatePinner;
 
-        public NativeMessageHandler() : this(false, new CustomSSLVerification()) { }
+        public NativeMessageHandler() : this(false, new SSLConfig()) { }
 
-        public NativeMessageHandler(bool throwOnCaptiveNetwork, CustomSSLVerification customSSLVerification, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, SSLConfig sSLConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
 
             // Enforce TLS1.2
             SslProtocols = SslProtocols.Tls12;
 
-            this.ServerCertificateCustomValidationCallback = (sender, cert, chain, errors) =>
-            {
-                var hostname = sender.RequestUri.Host;
-
-                if (!this.CertificatePinner.HasPins(hostname) || !this.CertificatePinner.Check(hostname, cert.RawData))
-                {
-                    errors = SslPolicyErrors.RemoteCertificateNameMismatch;
-                }
-
-                return errors == SslPolicyErrors.None;
-            };
-
-            this.CertificatePinner = new CertificatePinner();
-
             // Add Certificate Pins
-            foreach (var pin in customSSLVerification.Pins)
+            if (sSLConfig.Pins != null &&
+                sSLConfig.Pins.Count > 0 &&
+                sSLConfig.Pins[0].PublicKeys.Count() > 0 &&
+                sSLConfig.Pins[0].PublicKeys[0].StartsWith("sha256/", StringComparison.Ordinal))
             {
-                this.CertificatePinner.AddPins(pin.Hostname, pin.PublicKeys);
+                this.CertificatePinner = new CertificatePinner();
+
+                foreach (var pin in sSLConfig.Pins)
+                {
+                    this.CertificatePinner.AddPins(pin.Hostname, pin.PublicKeys);
+                }
             }
 
             // Set client credentials
-            SetClientCertificate(customSSLVerification.ClientCertificate);
+            SetClientCertificate(sSLConfig.ClientCertificate);
 
             if (cookieHandler != null)
             {
@@ -66,6 +62,38 @@ namespace ModernHttpClient
                 Proxy = proxy;
                 UseProxy = true;
             }
+
+            this.ServerCertificateCustomValidationCallback = (request, root, chain, errors) =>
+            {
+                if (EnableUntrustedCertificates)
+                {
+                    goto sslErrorVerify;
+                }
+
+                if (!chain.Build(root))
+                {
+                    errors = SslPolicyErrors.RemoteCertificateChainErrors;
+                    goto sslErrorVerify;
+                }
+
+                if (this.CertificatePinner != null)
+                {
+                    var hostname = request.RequestUri.Host;
+
+                    if (!this.CertificatePinner.HasPins(hostname))
+                    {
+                        goto sslErrorVerify;
+                    }
+
+                    if (!this.CertificatePinner.Check(hostname, root.RawData))
+                    {
+                        errors = SslPolicyErrors.RemoteCertificateNameMismatch;
+                    }
+                }
+
+            sslErrorVerify:
+                return errors == SslPolicyErrors.None;
+            };
         }
 
         private async void SetClientCertificate(ClientCertificate certificate)

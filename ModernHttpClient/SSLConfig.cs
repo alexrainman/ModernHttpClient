@@ -2,9 +2,9 @@
 
 namespace ModernHttpClient
 {
-    public class CustomSSLVerification
+    public class SSLConfig
     {
-        public CustomSSLVerification(){}
+        public SSLConfig(){}
 
         public List<Pin> Pins { get; set; }
         public ClientCertificate ClientCertificate { get; set; }

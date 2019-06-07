@@ -46,15 +46,16 @@ namespace ModernHttpClient
         readonly bool throwOnCaptiveNetwork;
 
         public bool DisableCaching { get; set; }
+        public bool EnableUntrustedCertificates { get; set; }
         public TimeSpan? Timeout { get; set; }
 
-        private readonly CertificatePinner CertificatePinner;
+        public readonly CertificatePinner CertificatePinner;
 
         private NSUrlCredential UrlCredential;
 
-        public NativeMessageHandler() : this(false, new CustomSSLVerification()) { }
+        public NativeMessageHandler() : this(false, new SSLConfig()) { }
 
-        public NativeMessageHandler(bool throwOnCaptiveNetwork, CustomSSLVerification customSSLVerification, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, SSLConfig sSLConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
 
@@ -65,14 +66,20 @@ namespace ModernHttpClient
             // this configuration directly and instead use the specified minimum value when one is specified.
             configuration.TLSMinimumSupportedProtocol = SslProtocol.Tls_1_2;
 
-            this.CertificatePinner = new CertificatePinner();
-
-            foreach (var pin in customSSLVerification.Pins)
+            if (sSLConfig.Pins != null &&
+                sSLConfig.Pins.Count > 0 &&
+                sSLConfig.Pins[0].PublicKeys.Count() > 0 &&
+                sSLConfig.Pins[0].PublicKeys[0].StartsWith("sha256/", StringComparison.Ordinal))
             {
-                this.CertificatePinner.AddPins(pin.Hostname, pin.PublicKeys);
+                this.CertificatePinner = new CertificatePinner();
+
+                foreach (var pin in sSLConfig.Pins)
+                {
+                    this.CertificatePinner.AddPins(pin.Hostname, pin.PublicKeys);
+                }
             }
 
-            SetClientCertificate(customSSLVerification.ClientCertificate);
+            SetClientCertificate(sSLConfig.ClientCertificate);
 
             // NSUrlSessionConfiguration.DefaultSessionConfiguration uses the default NSHttpCookieStorage.SharedStorage
 
@@ -234,11 +241,11 @@ namespace ModernHttpClient
 
         class DataTaskDelegate : NSUrlSessionDataDelegate, INSUrlSessionDelegate
         {
-            NativeMessageHandler This { get; set; }
+            NativeMessageHandler nativeHandler { get; set; }
 
-            public DataTaskDelegate(NativeMessageHandler that)
+            public DataTaskDelegate(NativeMessageHandler handler)
             {
-                this.This = that;
+                this.nativeHandler = handler;
             }
 
             public override void DidReceiveResponse(NSUrlSession session, NSUrlSessionDataTask dataTask, NSUrlResponse response, Action<NSUrlSessionResponseDisposition> completionHandler)
@@ -255,7 +262,7 @@ namespace ModernHttpClient
                     var resp = (NSHttpUrlResponse)response;
                     var req = data.Request;
 
-                    if (This.throwOnCaptiveNetwork && req.RequestUri.Host != resp.Url.Host)
+                    if (nativeHandler.throwOnCaptiveNetwork && req.RequestUri.Host != resp.Url.Host)
                     {
                         throw new CaptiveNetworkException(req.RequestUri, new Uri(resp.Url.ToString()));
                     }
@@ -306,7 +313,7 @@ namespace ModernHttpClient
             public override void WillCacheResponse(NSUrlSession session, NSUrlSessionDataTask dataTask,
                 NSCachedUrlResponse proposedResponse, Action<NSCachedUrlResponse> completionHandler)
             {
-                completionHandler(This.DisableCaching ? null : proposedResponse);
+                completionHandler(nativeHandler.DisableCaching ? null : proposedResponse);
             }
 
             public override void DidCompleteWithError(NSUrlSession session, NSUrlSessionTask task, NSError error)
@@ -326,9 +333,9 @@ namespace ModernHttpClient
 
                 data.ResponseBody.Complete();
 
-                lock (This.inflightRequests)
+                lock (nativeHandler.inflightRequests)
                 {
-                    This.inflightRequests.Remove(task);
+                    nativeHandler.inflightRequests.Remove(task);
                 }
             }
 
@@ -346,9 +353,9 @@ namespace ModernHttpClient
 
             InflightOperation getResponseForTask(NSUrlSessionTask task)
             {
-                lock (This.inflightRequests)
+                lock (nativeHandler.inflightRequests)
                 {
-                    return This.inflightRequests[task];
+                    return nativeHandler.inflightRequests[task];
                 }
             }
 
@@ -360,16 +367,16 @@ namespace ModernHttpClient
                 {
                     NetworkCredential credentialsToUse;
 
-                    if (This.Credentials != null)
+                    if (nativeHandler.Credentials != null)
                     {
-                        if (This.Credentials is NetworkCredential)
+                        if (nativeHandler.Credentials is NetworkCredential)
                         {
-                            credentialsToUse = (NetworkCredential)This.Credentials;
+                            credentialsToUse = (NetworkCredential)nativeHandler.Credentials;
                         }
                         else
                         {
                             var uri = this.getResponseForTask(task).Request.RequestUri;
-                            credentialsToUse = This.Credentials.GetCredential(uri, "NTLM");
+                            credentialsToUse = nativeHandler.Credentials.GetCredential(uri, "NTLM");
                         }
                         var credential = new NSUrlCredential(credentialsToUse.UserName, credentialsToUse.Password, NSUrlCredentialPersistence.ForSession);
                         completionHandler(NSUrlSessionAuthChallengeDisposition.UseCredential, credential);
@@ -379,21 +386,16 @@ namespace ModernHttpClient
 
                 if (challenge.ProtectionSpace.AuthenticationMethod == NSUrlProtectionSpace.AuthenticationMethodServerTrust)
                 {
-                    var serverCertChain = challenge.ProtectionSpace.ServerSecTrust;
-                    X509Certificate2 root = null;
-                    var errors = SslPolicyErrors.None;
-
-                    var netCerts = Enumerable.Range(0, serverCertChain.Count)
-                        .Select(x => serverCertChain[x].ToX509Certificate2())
-                        .ToArray();
-
-                    root = netCerts[0];
-
                     // Convert java certificates to .NET certificates and build cert chain from root certificate
-                    /*var serverCertChain = challenge.ProtectionSpace.ServerSecTrust;
+                    var serverCertChain = challenge.ProtectionSpace.ServerSecTrust;
                     var chain = new X509Chain();
                     X509Certificate2 root = null;
                     var errors = SslPolicyErrors.None;
+
+                    if (nativeHandler.EnableUntrustedCertificates)
+                    {
+                        goto sslErrorVerify;
+                    }
 
                     // Build certificate chain and check for errors
                     if (serverCertChain == null || serverCertChain.Count == 0)
@@ -441,22 +443,25 @@ namespace ModernHttpClient
                         errors = SslPolicyErrors.RemoteCertificateNameMismatch;
                         PinningFailureMessage = FailureMessages.SubjectNameMismatch;
                         goto sslErrorVerify;
-                    }*/
-
-                    var hostname = task.CurrentRequest.Url.Host;
-
-                    if (!This.CertificatePinner.HasPins(hostname))
-                    {
-                        errors = SslPolicyErrors.RemoteCertificateNameMismatch;
-                        PinningFailureMessage = FailureMessages.NoPinsProvided + " " + hostname;
-                        goto sslErrorVerify;
                     }
 
-                    var match = This.CertificatePinner.Check(hostname, root.RawData);
-                    if (!match)
+                    if (nativeHandler.CertificatePinner != null)
                     {
-                        errors = SslPolicyErrors.RemoteCertificateNameMismatch;
-                        PinningFailureMessage = FailureMessages.PinMismatch;
+                        var hostname = task.CurrentRequest.Url.Host;
+
+                        if (!nativeHandler.CertificatePinner.HasPins(hostname))
+                        {
+                            errors = SslPolicyErrors.RemoteCertificateNameMismatch;
+                            PinningFailureMessage = FailureMessages.NoPinsProvided + " " + hostname;
+                            goto sslErrorVerify;
+                        }
+
+                        var match = nativeHandler.CertificatePinner.Check(hostname, root.RawData);
+                        if (!match)
+                        {
+                            errors = SslPolicyErrors.RemoteCertificateNameMismatch;
+                            PinningFailureMessage = FailureMessages.PinMismatch;
+                        }
                     }
 
                 sslErrorVerify:
@@ -473,7 +478,7 @@ namespace ModernHttpClient
 
                 if (challenge.ProtectionSpace.AuthenticationMethod == NSUrlProtectionSpace.AuthenticationMethodClientCertificate)
                 {
-                    completionHandler(NSUrlSessionAuthChallengeDisposition.UseCredential, This.UrlCredential);
+                    completionHandler(NSUrlSessionAuthChallengeDisposition.UseCredential, nativeHandler.UrlCredential);
 
                     return;
                 }
@@ -485,7 +490,7 @@ namespace ModernHttpClient
 
             public override void WillPerformHttpRedirection(NSUrlSession session, NSUrlSessionTask task, NSHttpUrlResponse response, NSUrlRequest newRequest, Action<NSUrlRequest> completionHandler)
             {
-                NSUrlRequest nextRequest = (This.AllowAutoRedirect ? newRequest : null);
+                NSUrlRequest nextRequest = (nativeHandler.AllowAutoRedirect ? newRequest : null);
                 completionHandler(nextRequest);
             }
 

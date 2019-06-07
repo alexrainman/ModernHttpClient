@@ -10,8 +10,6 @@ namespace ModernHttpClient
     {
         const string wrongVersion = "You're referencing the Portable version in your App - you need to reference the platform (iOS/Android/Windows) version";
 
-        public bool DisableCaching { get; set; }
-
         /// <summary>
         /// Initializes a new instance of the <see
         /// cref="ModernHttpClient.NativeMessageHandler"/> class.
@@ -28,15 +26,15 @@ namespace ModernHttpClient
         /// captive network (ie: a captive network is usually a wifi network
         /// where an authentication html form is shown instead of the real
         /// content).</param>
-        /// <param name="customSSLVerification">Enable custom SSL certificate 
-        /// verification via ServicePointManager. Disabled by default for 
-        /// performance reasons (i.e. the OS default certificate verification 
-        /// will take place)</param>
+        /// <param name="sSLConfig">To enable TLS Mutual Authentication</param>
         /// <param name="cookieHandler">Enable native cookie handling.
         /// </param>
-        public NativeMessageHandler(bool throwOnCaptiveNetwork, CustomSSLVerification customSSLVerification, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null) : base()
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, SSLConfig sSLConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null) : base()
         {
         }
+
+        public bool DisableCaching { get; set; }
+        public bool EnableUntrustedCertificates { get; set; }
 
         public TimeSpan? Timeout
         {

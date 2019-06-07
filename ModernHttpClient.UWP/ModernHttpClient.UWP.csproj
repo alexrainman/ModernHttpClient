@@ -129,8 +129,8 @@
     <Compile Include="..\ModernHttpClient\CaptiveNetworkException.cs">
       <Link>CaptiveNetworkException.cs</Link>
     </Compile>
-    <Compile Include="..\ModernHttpClient\CustomSSLVerification.cs">
-      <Link>CustomSSLVerification.cs</Link>
+    <Compile Include="..\ModernHttpClient\SSLConfig.cs">
+      <Link>SSLConfig.cs</Link>
     </Compile>
     <Compile Include="HttpRequestHeadersExtensions.cs" />
     <Compile Include="NativeCookieHandler.cs" />

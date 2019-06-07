@@ -35,7 +35,7 @@ namespace Demo.Droid
                 // The easiest way to pin a host is turn on pinning with a broken configuration and read the expected configuration when the connection fails.
                 // Be sure to do this on a trusted network, and without man -in-the - middle tools like Charles or Fiddler.
 
-                /*var hostname = "reqres.in";
+                /*var hostname = "gorest.co.in";
 
                 var certificatePinner = new Square.OkHttp3.CertificatePinner.Builder()
                     .Add(hostname, "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")

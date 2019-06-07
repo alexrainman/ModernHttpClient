@@ -9,18 +9,18 @@ namespace Demo
 {
     public class MainViewModel
     {
-        readonly HttpClient client = new HttpClient(new NativeMessageHandler(false, new CustomSSLVerification()
+        readonly HttpClient client = new HttpClient(new NativeMessageHandler(false, new SSLConfig()
         {
             Pins = new List<Pin>()
             {
                 new Pin()
                 {
-                    Hostname = "reqres.in",
+                    Hostname = "gorest.co.in",
                     PublicKeys = new []
                     {
-                        "sha256/CZEvkurQ3diX6pndH4Z5/dUNzK1Gm6+n8Hdx/DQgjO0=",
-                        "sha256/x9SZw6TwIqfmvrLZ/kz1o0Ossjmn728BnBKpUFqGNVM=",
-                        "sha256/58qRu/uxh4gFezqAcERupSkRYBlBAvfcw7mEjGPLnNU="
+                        "sha256/MCBrX+0kgfNc/qacknAJ5nojbFIx7kBSJSmXKjJviIg=",
+                        "sha256/YLh1dUR9y6Kja30RrAn7JKnbQG/uEtLMkBgFF2Fuihg=",
+                        "sha256/Vjs8r4z+80wjNcr1YKepWQboSIRi63WsWXhIMN+eWys="
                     }
                 }
             }/*,
@@ -29,17 +29,16 @@ namespace Demo
                 RawData = "PFX_DATA",
                 Passphrase = "PFX_PASSPHRASE"
             }*/
-        },
-            null,
-            new System.Net.WebProxy("127.0.0.1:80", false))
+        }, null, new System.Net.WebProxy("127.0.0.1:80", false))
         {
             DisableCaching = true,
+            EnableUntrustedCertificates = false,
             Timeout = new TimeSpan(0, 0, 9)
         });
 
         public async Task Get()
         {
-            var response = await client.GetAsync(new Uri("https://reqres.in/api/users"));
+            var response = await client.GetAsync(new Uri("https://gorest.co.in/public-api/users?_format=json&access-token=ZsjrVYhueqIMDxIUtMVxFJpecrfqiL3kLY37"));
 
             Debug.WriteLine(response.Content);
         }

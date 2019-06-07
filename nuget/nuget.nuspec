@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <version>3.1.0</version>
+    <version>3.2.0</version>
     <authors>Alex Rainman</authors>
     <owners>Alex Rainman</owners>
     <licenseUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/LICENSE</licenseUrl>
@@ -9,23 +9,16 @@
     <id>modernhttpclient-updated</id>
     <title>ModernHttpClient</title>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Write your app using System.Net.Http, but drop this library in and it will go securily faster.</description>
-    <summary>Write your app using System.Net.Http, but drop this library in and it will go securily faster.</summary>
+    <description>This library brings the latest platform-specific networking libraries to Xamarin applications via a custom HttpClient handler.</description>
+    <summary>This library brings the latest platform-specific networking libraries to Xamarin applications via a custom HttpClient handler.</summary>
     <copyright>Copyright Alex Rainman © 2019</copyright>
     <iconUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/download.png</iconUrl>
     <releaseNotes>
-3.1.0
-Adding support for web proxy.
-3.0.2
-Method not found: void ModernHttpClient.NativeMessageHandler..ctor()
-3.0.1
-[iOS] Changing BouncyCastle dependency to Portable.BouncyCastle
-3.0.0
+3.2.0
 Code refactoring.
-Focused on security.
-Adding support for 2-way certificate pinning (Mutual TLS Authentication)
+Adding support for Mutual TLS Authentication
 Enforcing TLS1.2
-Removing support for untrusted certificates.
+Adding support for web proxy.
 [iOS] Removing minimumSSLProtocol static property.
 [Android] Removing verifyHostnameCallback static property.
 [Android] Removing customTrustManager static property.

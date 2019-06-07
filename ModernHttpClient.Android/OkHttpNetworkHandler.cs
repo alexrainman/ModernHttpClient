@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -32,15 +33,16 @@ namespace ModernHttpClient
             };
 
         public bool DisableCaching { get; set; }
+        public bool EnableUntrustedCertificates { get; set; }
         public TimeSpan? Timeout { get; set; }
 
-        private readonly CertificatePinner.Builder CertificatePinnerBuilder;
+        public readonly CertificatePinner CertificatePinner;
 
         private IKeyManager[] KeyManagers;
 
-        public NativeMessageHandler() : this(false, new CustomSSLVerification()) { }
+        public NativeMessageHandler() : this(false, new SSLConfig()) { }
 
-        public NativeMessageHandler(bool throwOnCaptiveNetwork, CustomSSLVerification customSSLVerification, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, SSLConfig sSLConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
 
@@ -52,20 +54,24 @@ namespace ModernHttpClient
             clientBuilder.ConnectionSpecs(new List<ConnectionSpec>() { specs });
             clientBuilder.Protocols(new[] { Protocol.Http11 }); // Required to avoid stream was reset: PROTOCOL_ERROR 
 
-            clientBuilder.HostnameVerifier(new HostnameVerifier(customSSLVerification.Pins));
-
-            this.CertificatePinnerBuilder = new CertificatePinner.Builder();
-
             // Add Certificate Pins
-            foreach (var pin in customSSLVerification.Pins)
+            if (sSLConfig.Pins != null &&
+                sSLConfig.Pins.Count > 0 &&
+                sSLConfig.Pins[0].PublicKeys.Count() > 0 &&
+                sSLConfig.Pins[0].PublicKeys[0].StartsWith("sha256/", StringComparison.Ordinal))
             {
-                this.CertificatePinnerBuilder.Add(pin.Hostname, pin.PublicKeys);
+                this.CertificatePinner = new CertificatePinner();
+
+                foreach (var pin in sSLConfig.Pins)
+                {
+                    this.CertificatePinner.AddPins(pin.Hostname, pin.PublicKeys);
+                }
+
+                clientBuilder.CertificatePinner(CertificatePinner.Build());
             }
 
-            clientBuilder.CertificatePinner(CertificatePinnerBuilder.Build());
-
             // Set client credentials
-            SetClientCertificate(customSSLVerification.ClientCertificate);
+            SetClientCertificate(sSLConfig.ClientCertificate);
 
             // Set SslSocketFactory
             if (Build.VERSION.SdkInt < BuildVersionCodes.Lollipop)
@@ -93,6 +99,7 @@ namespace ModernHttpClient
                 clientBuilder.Proxy(jProxy);
             }
 
+            clientBuilder.HostnameVerifier(new HostnameVerifier(this));
             client = clientBuilder.Build();
         }
 
@@ -355,11 +362,11 @@ namespace ModernHttpClient
 
         public static string PinningFailureMessage = null;
 
-        private readonly List<Pin> Pins;
+        NativeMessageHandler nativeHandler { get; set; }
 
-        public HostnameVerifier(List<Pin> pins)
+        public HostnameVerifier(NativeMessageHandler handler)
         {
-            this.Pins = pins;
+            this.nativeHandler = handler;
         }
 
         /// <summary>
@@ -371,13 +378,16 @@ namespace ModernHttpClient
         /// <param name="session"></param>
         public bool Verify(string hostname, ISSLSession session)
         {
-            var errors = SslPolicyErrors.None;
-
             // Convert java certificates to .NET certificates and build cert chain from root certificate
-            /*var serverCertChain = session.GetPeerCertificateChain();
+            var serverCertChain = session.GetPeerCertificateChain();
             var chain = new X509Chain();
             X509Certificate2 root = null;
             var errors = SslPolicyErrors.None;
+
+            if (nativeHandler.EnableUntrustedCertificates)
+            {
+                goto sslErrorVerify;
+            }
 
             // Build certificate chain and check for errors
             if (serverCertChain == null || serverCertChain.Length == 0)
@@ -423,15 +433,20 @@ namespace ModernHttpClient
                 errors = SslPolicyErrors.RemoteCertificateNameMismatch;
                 PinningFailureMessage = FailureMessages.SubjectNameMismatch;
                 goto sslErrorVerify;
-            }*/
-
-            if (Pins.FirstOrDefault((pin) => pin.Hostname == hostname) == null)
-            {
-                errors = SslPolicyErrors.RemoteCertificateNameMismatch;
-                PinningFailureMessage = FailureMessages.NoPinsProvided + " " + hostname;
             }
 
-        //sslErrorVerify:
+            if (nativeHandler.CertificatePinner != null)
+            {
+                if (!nativeHandler.CertificatePinner.HasPins(hostname))
+                {
+                    errors = SslPolicyErrors.RemoteCertificateNameMismatch;
+                    PinningFailureMessage = FailureMessages.NoPinsProvided + " " + hostname;
+                }
+
+                // CertificatePinner.Check will be done by Square.OkHttp3.CertificatePinner
+            }
+
+        sslErrorVerify:
             return errors == SslPolicyErrors.None;
         }
     }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace ModernHttpClient
 {
@@ -9,7 +8,8 @@ namespace ModernHttpClient
         {
             // check if this is a pattern
             int index = pattern.IndexOf('*');
-            if (index == -1) {
+            if (index == -1)
+            {
                 // not a pattern, do a direct case-insensitive comparison
 #if __PORTABLE__
                 return (string.Compare(hostname, pattern) == 0);
@@ -22,9 +22,11 @@ namespace ModernHttpClient
             // A "*" wildcard character MAY be used as the left-most name component in the certificate.
 
             // unless this is the last char (valid)
-            if (index != pattern.Length - 1) {
+            if (index != pattern.Length - 1)
+            {
                 // then the next char must be a dot .'.
-                if (pattern[index + 1] != '.') {
+                if (pattern[index + 1] != '.')
+                {
                     return false;
                 }
             }
@@ -43,13 +45,15 @@ namespace ModernHttpClient
                 return false;
             }
 #else
-            if (string.Compare(hostname, length, end, 0, end.Length, true, CultureInfo.InvariantCulture) != 0) {
+            if (string.Compare(hostname, length, end, 0, end.Length, true, CultureInfo.InvariantCulture) != 0)
+            {
                 return false;
             }
 #endif
 
             // special case, we start with the wildcard
-            if (index == 0) {
+            if (index == 0)
+            {
                 // ensure we hostname non-matched part (start) doesn't contain a dot
                 int i3 = hostname.IndexOf('.');
                 return ((i3 == -1) || (i3 >= (hostname.Length - end.Length)));

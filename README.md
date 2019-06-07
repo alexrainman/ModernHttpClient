@@ -3,8 +3,7 @@ ModernHttpClient
 
 Available on NuGet: https://www.nuget.org/packages/modernhttpclient-updated/ [![NuGet](https://img.shields.io/nuget/v/modernhttpclient-updated.svg?label=NuGet)](https://www.nuget.org/packages/modernhttpclient-updated/)
 
-This library brings the latest platform-specific networking libraries to
-Xamarin applications via a custom HttpClient handler.
+This library brings the latest platform-specific networking libraries to Xamarin applications via a custom HttpClient handler.
 
 This is made possible by:
 
@@ -18,21 +17,7 @@ Just reference ModernHttpClient in your .Net Standard or Portable Library, and i
 
 ### What's new?
 
-This release is focused on security so, the original code has been refactored to remove deprecated APIs and meet the new standards.
-
-Support for untrusted certificates has been removed.
-
-Using untrusted certificates is considered a security flaw.
-
-https://www.globalsign.com/en/ssl-information-center/dangers-self-signed-certificates/
-
-You can get a valid SSL certificate for free from one of these certificate authorities:
-
-https://www.sslforfree.com
-
-https://letsencrypt.org/getting-started/
-
-https://ssl.comodo.com/free-ssl-certificate.php
+Use SSLConfig parameter to provide server certificate chain public keys and a client certificate for Mutual TLS Authentication.
 
 TLS 1.2 has been enforced.
 
@@ -40,27 +25,23 @@ Read why here:
 
 https://www.brillianceweb.com/resources/answers-to-7-common-questions-about-upgrading-to-tls-1.2/
 
-Really "modernizing" the way ModernHttpClient implements certificate pinning, using server certificate chain public keys and adding support for client certificates, for a 2-Way Certificate Pinning (or what is also called Mutual TLS Authentication).
-
-As a result, minimumSSLProtocol static property has been removed from iOS, verifyHostnameCallback and customTrustManager static properties has been removed from Android.
-
 ### Usage
 
 Here's how it works:
 
 ```cs
-readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new CustomSSLVerification()
+readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new SSLConfig()
 {
     Pins = new List<Pin>()
     {
         new Pin()
         {
-            Hostname = "reqres.in",
+            Hostname = "gorest.co.in",
             PublicKeys = new []
             {
-                "sha256/CZEvkurQ3diX6pndH4Z5/dUNzK1Gm6+n8Hdx/DQgjO0=",
-                "sha256/x9SZw6TwIqfmvrLZ/kz1o0Ossjmn728BnBKpUFqGNVM=",
-                "sha256/58qRu/uxh4gFezqAcERupSkRYBlBAvfcw7mEjGPLnNU="
+                "sha256/MCBrX+0kgfNc/qacknAJ5nojbFIx7kBSJSmXKjJviIg=",
+                "sha256/YLh1dUR9y6Kja30RrAn7JKnbQG/uEtLMkBgFF2Fuihg=",
+                "sha256/Vjs8r4z+80wjNcr1YKepWQboSIRi63WsWXhIMN+eWys="
             }
         }
     },
@@ -76,13 +57,15 @@ readonly static HttpClient client = new HttpClient(new NativeMessageHandler(fals
 });
 ```
 
+If server certificate chain public keys are not provided, the basic server certificate verification will be done.
+
 ### How to obtain server certificate chain public keys?
 
 1. In your Android project add Square.OkHttp3 Nuget Package.
 2. In your Main Activity, add a button and on its click event run this code:
 
 ```cs
-var hostname = "reqres.in";
+var hostname = "gorest.co.in";
 var certificatePinner = new Square.OkHttp3.CertificatePinner.Builder()
     .Add(hostname, "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
     .Build();
@@ -103,10 +86,10 @@ As expected, this fails with a certificate pinning exception:
 ```cs
 Certificate pinning failure!
   Peer certificate chain:
-    sha256/CZEvkurQ3diX6pndH4Z5/dUNzK1Gm6+n8Hdx/DQgjO0=: CN=sni96286.cloudflaressl.com,OU=PositiveSSL Multi-Domain,OU=Domain Control Validated
-    sha256/x9SZw6TwIqfmvrLZ/kz1o0Ossjmn728BnBKpUFqGNVM=: CN=COMODO ECC Domain Validation Secure Server CA 2,O=COMODO CA Limited,L=Salford,ST=Greater Manchester,C=GB
-    sha256/58qRu/uxh4gFezqAcERupSkRYBlBAvfcw7mEjGPLnNU=: CN=COMODO ECC Certification Authority,O=COMODO CA Limited,L=Salford,ST=Greater Manchester,C=GB
-  Pinned certificates for reqres.in:
+    sha256/MCBrX+0kgfNc/qacknAJ5nojbFIx7kBSJSmXKjJviIg=: CN=gorest.co.in
+    sha256/YLh1dUR9y6Kja30RrAn7JKnbQG/uEtLMkBgFF2Fuihg=: CN=Let's Encrypt Authority X3,O=Let's Encrypt,C=US
+    sha256/Vjs8r4z+80wjNcr1YKepWQboSIRi63WsWXhIMN+eWys=: CN=DST Root CA X3,O=Digital Signature Trust Co.
+  Pinned certificates for gorest.co.in:
     sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
 ```
 
@@ -142,18 +125,18 @@ SetCookie before making the http call and they will be added to Cookie header in
 ```cs
 NativeCookieHandler cookieHandler = new NativeCookieHandler();
 
-readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new CustomSSLVerification()
+readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new SSLConfig()
 {
     Pins = new List<Pin>()
     {
         new Pin()
         {
-            Hostname = "reqres.in",
+            Hostname = "gorest.co.in",
             PublicKeys = new []
             {
-                "sha256/CZEvkurQ3diX6pndH4Z5/dUNzK1Gm6+n8Hdx/DQgjO0=",
-                "sha256/x9SZw6TwIqfmvrLZ/kz1o0Ossjmn728BnBKpUFqGNVM=",
-                "sha256/58qRu/uxh4gFezqAcERupSkRYBlBAvfcw7mEjGPLnNU="
+                "sha256/MCBrX+0kgfNc/qacknAJ5nojbFIx7kBSJSmXKjJviIg=",
+                "sha256/YLh1dUR9y6Kja30RrAn7JKnbQG/uEtLMkBgFF2Fuihg=",
+                "sha256/Vjs8r4z+80wjNcr1YKepWQboSIRi63WsWXhIMN+eWys="
             }
         }
     },
@@ -190,18 +173,18 @@ var response = await client.GetAsync(new Uri("https://reqres.in"));
 A four parameter has been added to the NativeMessageHandler to support Web Proxies:
 
 ```cs
-readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new CustomSSLVerification()
+readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new SSLConfig()
 {
     Pins = new List<Pin>()
     {
         new Pin()
         {
-            Hostname = "reqres.in",
+            Hostname = "gorest.co.in",
             PublicKeys = new []
             {
-                "sha256/CZEvkurQ3diX6pndH4Z5/dUNzK1Gm6+n8Hdx/DQgjO0=",
-                "sha256/x9SZw6TwIqfmvrLZ/kz1o0Ossjmn728BnBKpUFqGNVM=",
-                "sha256/58qRu/uxh4gFezqAcERupSkRYBlBAvfcw7mEjGPLnNU="
+                "sha256/MCBrX+0kgfNc/qacknAJ5nojbFIx7kBSJSmXKjJviIg=",
+                "sha256/YLh1dUR9y6Kja30RrAn7JKnbQG/uEtLMkBgFF2Fuihg=",
+                "sha256/Vjs8r4z+80wjNcr1YKepWQboSIRi63WsWXhIMN+eWys="
             }
         }
     },
@@ -219,31 +202,39 @@ new System.Net.WebProxy("127.0.0.1:80", false))
 });
 ```
 
+If the Web Proxy address is not reachable, you will get the following exceptions:
+
+iOS:
+
+```
+KCFErrorDomainCFNetwork error 310: cannot find the proxy server.
+```
+
+Android:
+
+```
+System.Net.Http.HttpRequestException
+Failed to connect to /127.0.0.1:80
+```
+
+UWP:
+
+```
+Exception: The text associated with this error code could not be found.
+The server name or address could not be resolved
+```
+
 #### Release Notes
 
-3.1.0
-
-Adding support for web proxy.
-
-3.0.2
-
-Method not found: void ModernHttpClient.NativeMessageHandler..ctor()
-
-3.0.1
-
-[iOS] Changing BouncyCastle dependency to Portable.BouncyCastle
-
-3.0.0
+3.2.0
 
 Code refactoring.
 
-Focused on security.
-
-Removing support for untrusted certificates.
+Adding support for Mutual TLS Authentication
 
 Enforcing TLS1.2
 
-Adding support for 2-way certificate pinning (Mutual TLS Authentication)
+Adding support for web proxy.
 
 [iOS] Removing minimumSSLProtocol static property.
 
