@@ -170,7 +170,7 @@ var response = await client.GetAsync(new Uri("https://reqres.in"));
 
 ## How to use a Web Proxy?
 
-A four parameter has been added to the NativeMessageHandler to support Web Proxies:
+Just provide the Web Proxy configuration as part of the ctor:
 
 ```cs
 readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new SSLConfig()
