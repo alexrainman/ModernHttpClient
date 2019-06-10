@@ -226,7 +226,7 @@ The server name or address could not be resolved
 
 #### Release Notes
 
-3.2.0
+2.8.0
 
 Code refactoring.
 

@@ -23,13 +23,8 @@ namespace Demo
                         "sha256/Vjs8r4z+80wjNcr1YKepWQboSIRi63WsWXhIMN+eWys="
                     }
                 }
-            }/*,
-            ClientCertificate = new ClientCertificate()
-            {
-                RawData = "PFX_DATA",
-                Passphrase = "PFX_PASSPHRASE"
-            }*/
-        }, null, new System.Net.WebProxy("127.0.0.1:80", false))
+            }
+        })
         {
             DisableCaching = true,
             EnableUntrustedCertificates = false,

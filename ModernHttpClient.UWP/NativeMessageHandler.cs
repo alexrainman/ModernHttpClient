@@ -70,6 +70,11 @@ namespace ModernHttpClient
                     goto sslErrorVerify;
                 }
 
+                if (errors != SslPolicyErrors.None)
+                {
+                    goto sslErrorVerify;
+                }
+
                 if (!chain.Build(root))
                 {
                     errors = SslPolicyErrors.RemoteCertificateChainErrors;
@@ -82,6 +87,7 @@ namespace ModernHttpClient
 
                     if (!this.CertificatePinner.HasPins(hostname))
                     {
+                        errors = SslPolicyErrors.RemoteCertificateNameMismatch;
                         goto sslErrorVerify;
                     }
 

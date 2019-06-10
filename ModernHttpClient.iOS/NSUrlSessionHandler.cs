@@ -323,7 +323,7 @@ namespace ModernHttpClient
 
                 if (error != null)
                 {
-                    var ex = createExceptionForNSError(error);
+                    var ex = CreateExceptionForNSError(error);
 
                     // Pass the exception to the response
                     data.FutureResponse.TrySetException(ex);
@@ -456,8 +456,7 @@ namespace ModernHttpClient
                             goto sslErrorVerify;
                         }
 
-                        var match = nativeHandler.CertificatePinner.Check(hostname, root.RawData);
-                        if (!match)
+                        if (!nativeHandler.CertificatePinner.Check(hostname, root.RawData))
                         {
                             errors = SslPolicyErrors.RemoteCertificateNameMismatch;
                             PinningFailureMessage = FailureMessages.PinMismatch;
@@ -494,7 +493,7 @@ namespace ModernHttpClient
                 completionHandler(nextRequest);
             }
 
-            Exception createExceptionForNSError(NSError error)
+            Exception CreateExceptionForNSError(NSError error)
             {
                 var ret = default(Exception);
                 var webExceptionStatus = WebExceptionStatus.UnknownError;
