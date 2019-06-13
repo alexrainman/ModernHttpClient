@@ -226,6 +226,12 @@ The server name or address could not be resolved
 
 #### Release Notes
 
+2.8.1
+
+[iOS] Timeout using wrong TimeSpan value #31.
+
+[Android] "Trust anchor for certification path not found." with self-signed certificate.
+
 2.8.0
 
 Code refactoring.
