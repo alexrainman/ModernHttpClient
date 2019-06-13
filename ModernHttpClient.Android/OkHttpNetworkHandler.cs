@@ -73,19 +73,6 @@ namespace ModernHttpClient
             // Set client credentials
             SetClientCertificate(sSLConfig.ClientCertificate);
 
-            // Set SslSocketFactory
-            if (Build.VERSION.SdkInt < BuildVersionCodes.Lollipop)
-            {
-                // Support TLS1.2 on Android versions before Lollipop
-                clientBuilder.SslSocketFactory(new TlsSslSocketFactory(KeyManagers, null), TlsSslSocketFactory.GetSystemDefaultTrustManager());
-            }
-            else
-            {
-                var sslContext = SSLContext.GetInstance("TLS");
-                sslContext.Init(KeyManagers, null, null);
-                clientBuilder.SslSocketFactory(sslContext.SocketFactory, TlsSslSocketFactory.GetSystemDefaultTrustManager());
-            }
-
             if (cookieHandler != null) clientBuilder.CookieJar(cookieHandler);
 
             // Adding proxy support
@@ -161,6 +148,35 @@ namespace ModernHttpClient
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            var clientBuilder = client.NewBuilder();
+
+            var sslContext = SSLContext.GetInstance("TLS");
+
+            // Support self-signed certificates
+            if (EnableUntrustedCertificates)
+            {
+                // Install the all-trusting trust manager
+                var trustManager = new CustomX509TrustManager();
+                sslContext.Init(KeyManagers, new ITrustManager[] { trustManager }, new SecureRandom());
+                // Create an ssl socket factory with our all-trusting manager
+                var sslSocketFactory = sslContext.SocketFactory;
+                clientBuilder.SslSocketFactory(sslSocketFactory, trustManager);
+            }
+            else
+            {
+                // Set SslSocketFactory
+                if (Build.VERSION.SdkInt < BuildVersionCodes.Lollipop)
+                {
+                    // Support TLS1.2 on Android versions before Lollipop
+                    clientBuilder.SslSocketFactory(new TlsSslSocketFactory(KeyManagers, null), TlsSslSocketFactory.GetSystemDefaultTrustManager());
+                }
+                else
+                {
+                    sslContext.Init(KeyManagers, null, null);
+                    clientBuilder.SslSocketFactory(sslContext.SocketFactory, TlsSslSocketFactory.GetSystemDefaultTrustManager());
+                }
+            }
+
             var java_uri = request.RequestUri.GetComponents(UriComponents.AbsoluteUri, UriFormat.UriEscaped);
             var url = new Java.Net.URL(java_uri);
 
@@ -172,7 +188,7 @@ namespace ModernHttpClient
                 var contentType = "text/plain";
                 if (request.Content.Headers.ContentType != null)
                 {
-                    contentType = String.Join(" ", request.Content.Headers.GetValues("Content-Type"));
+                    contentType = string.Join(" ", request.Content.Headers.GetValues("Content-Type"));
                 }
                 body = RequestBody.Create(MediaType.Parse(contentType), bytes);
             }
@@ -224,13 +240,13 @@ namespace ModernHttpClient
 
             if (Timeout != null)
             {
-                var clientBuilder = client.NewBuilder();
-                var timeout = (long)Timeout.Value.TotalMilliseconds;
-                clientBuilder.ConnectTimeout(timeout, TimeUnit.Milliseconds);
-                clientBuilder.WriteTimeout(timeout, TimeUnit.Milliseconds);
-                clientBuilder.ReadTimeout(timeout, TimeUnit.Milliseconds);
-                client = clientBuilder.Build();
+                var timeout = (long)Timeout.Value.TotalSeconds;
+                clientBuilder.ConnectTimeout(timeout, TimeUnit.Seconds);
+                clientBuilder.WriteTimeout(timeout, TimeUnit.Seconds);
+                clientBuilder.ReadTimeout(timeout, TimeUnit.Seconds);
             }
+
+            client = clientBuilder.Build();
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -378,10 +394,6 @@ namespace ModernHttpClient
         /// <param name="session"></param>
         public bool Verify(string hostname, ISSLSession session)
         {
-            // Convert java certificates to .NET certificates and build cert chain from root certificate
-            var serverCertChain = session.GetPeerCertificateChain();
-            var chain = new X509Chain();
-            X509Certificate2 root = null;
             var errors = SslPolicyErrors.None;
 
             if (nativeHandler.EnableUntrustedCertificates)
@@ -389,6 +401,11 @@ namespace ModernHttpClient
                 goto sslErrorVerify;
             }
 
+            // Convert java certificates to .NET certificates and build cert chain from root certificate
+            var serverCertChain = session.GetPeerCertificateChain();
+            var chain = new X509Chain();
+            X509Certificate2 root = null;
+            
             // Build certificate chain and check for errors
             if (serverCertChain == null || serverCertChain.Length == 0)
             {//no cert at all
@@ -448,6 +465,22 @@ namespace ModernHttpClient
 
         sslErrorVerify:
             return errors == SslPolicyErrors.None;
+        }
+    }
+
+    class CustomX509TrustManager : Java.Lang.Object, IX509TrustManager
+    {
+        public void CheckClientTrusted(Java.Security.Cert.X509Certificate[] chain, string authType)
+        {
+        }
+
+        public void CheckServerTrusted(Java.Security.Cert.X509Certificate[] chain, string authType)
+        {
+        }
+
+        Java.Security.Cert.X509Certificate[] IX509TrustManager.GetAcceptedIssuers()
+        {
+            return new Java.Security.Cert.X509Certificate[0];
         }
     }
 }

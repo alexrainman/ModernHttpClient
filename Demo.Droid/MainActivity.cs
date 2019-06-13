@@ -1,18 +1,6 @@
 ﻿using Android.App;
-using Android.Widget;
 using Android.OS;
-using System.Net.Http;
-using ModernHttpClient;
-using System;
-using System.Diagnostics;
-using System.Net;
-using Java.Security.Cert;
-using Java.Security;
-using Javax.Net.Ssl;
-using Square.OkHttp3;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Java.Util.Concurrent;
+using Android.Widget;
 
 namespace Demo.Droid
 {

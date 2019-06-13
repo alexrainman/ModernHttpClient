@@ -70,8 +70,16 @@ namespace ModernHttpClient
                     goto sslErrorVerify;
                 }
 
-                if (errors != SslPolicyErrors.None)
-                {
+                // Build certificate chain and check for errors
+                if (chain == null || chain.ChainElements.Count == 0)
+                {//no cert at all
+                    errors = SslPolicyErrors.RemoteCertificateNotAvailable;
+                    goto sslErrorVerify;
+                }
+
+                if (chain.ChainElements.Count == 1)
+                {//no root?
+                    errors = SslPolicyErrors.RemoteCertificateChainErrors;
                     goto sslErrorVerify;
                 }
 

@@ -214,7 +214,7 @@ namespace ModernHttpClient
             }
 
             if (Timeout != null)
-                rq.TimeoutInterval = Timeout.Value.Seconds;
+                rq.TimeoutInterval = Timeout.Value.TotalSeconds;
 
             var op = session.CreateDataTask(rq);
 
@@ -386,10 +386,6 @@ namespace ModernHttpClient
 
                 if (challenge.ProtectionSpace.AuthenticationMethod == NSUrlProtectionSpace.AuthenticationMethodServerTrust)
                 {
-                    // Convert java certificates to .NET certificates and build cert chain from root certificate
-                    var serverCertChain = challenge.ProtectionSpace.ServerSecTrust;
-                    var chain = new X509Chain();
-                    X509Certificate2 root = null;
                     var errors = SslPolicyErrors.None;
 
                     if (nativeHandler.EnableUntrustedCertificates)
@@ -397,6 +393,11 @@ namespace ModernHttpClient
                         goto sslErrorVerify;
                     }
 
+                    // Convert java certificates to .NET certificates and build cert chain from root certificate
+                    var serverCertChain = challenge.ProtectionSpace.ServerSecTrust;
+                    var chain = new X509Chain();
+                    X509Certificate2 root = null;
+                    
                     // Build certificate chain and check for errors
                     if (serverCertChain == null || serverCertChain.Count == 0)
                     {//no cert at all
