@@ -436,20 +436,25 @@ namespace ModernHttpClient
                         goto sslErrorVerify;
                     }
 
+                    var hostname = task.CurrentRequest.Url.Host;
+
                     var subject = root.Subject;
                     var subjectCn = cnRegex.Match(subject).Groups[1].Value;
 
-                    if (string.IsNullOrWhiteSpace(subjectCn) || !Utility.MatchHostnameToPattern(task.CurrentRequest.Url.Host, subjectCn))
+                    if (string.IsNullOrWhiteSpace(subjectCn) || !Utility.MatchHostnameToPattern(hostname, subjectCn))
                     {
-                        errors = SslPolicyErrors.RemoteCertificateNameMismatch;
-                        PinningFailureMessage = FailureMessages.SubjectNameMismatch;
-                        goto sslErrorVerify;
+                        var subjectAn = root.ParseSubjectAlternativeName();
+
+                        if (!subjectAn.Contains(hostname))
+                        {
+                            errors = SslPolicyErrors.RemoteCertificateNameMismatch;
+                            PinningFailureMessage = FailureMessages.SubjectNameMismatch;
+                            goto sslErrorVerify;
+                        }
                     }
 
                     if (nativeHandler.CertificatePinner != null)
                     {
-                        var hostname = task.CurrentRequest.Url.Host;
-
                         if (!nativeHandler.CertificatePinner.HasPins(hostname))
                         {
                             errors = SslPolicyErrors.RemoteCertificateNameMismatch;

@@ -68,6 +68,9 @@
     <Compile Include="..\ModernHttpClient\SSLConfig.cs">
       <Link>SSLConfig.cs</Link>
     </Compile>
+    <Compile Include="..\ModernHttpClient.Android\X509Certificate2Extension.cs">
+      <Link>X509Certificate2Extension.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

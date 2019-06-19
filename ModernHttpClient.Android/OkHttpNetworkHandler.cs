@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Security;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -161,6 +162,10 @@ namespace ModernHttpClient
                 // Create an ssl socket factory with our all-trusting manager
                 var sslSocketFactory = sslContext.SocketFactory;
                 clientBuilder.SslSocketFactory(sslSocketFactory, trustManager);
+
+                // Reset certificate pinner
+                var certificatePinner = new CertificatePinner();
+                clientBuilder.CertificatePinner(certificatePinner.Build());
             }
             else
             {
@@ -447,9 +452,14 @@ namespace ModernHttpClient
 
             if (string.IsNullOrWhiteSpace(subjectCn) || !Utility.MatchHostnameToPattern(hostname, subjectCn))
             {
-                errors = SslPolicyErrors.RemoteCertificateNameMismatch;
-                PinningFailureMessage = FailureMessages.SubjectNameMismatch;
-                goto sslErrorVerify;
+                var subjectAn = root.ParseSubjectAlternativeName();
+
+                if (!subjectAn.Contains(hostname))
+                {
+                    errors = SslPolicyErrors.RemoteCertificateNameMismatch;
+                    PinningFailureMessage = FailureMessages.SubjectNameMismatch;
+                    goto sslErrorVerify;
+                }
             }
 
             if (nativeHandler.CertificatePinner != null)

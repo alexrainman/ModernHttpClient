@@ -10,7 +10,7 @@ namespace Demo
     public class MainViewModel
     {
         readonly HttpClient client = new HttpClient(new NativeMessageHandler(false, new SSLConfig()
-        /*{
+        {
             Pins = new List<Pin>()
             {
                 new Pin()
@@ -24,7 +24,7 @@ namespace Demo
                     }
                 }
             }
-        }*/)
+        })
         {
             DisableCaching = true,
             EnableUntrustedCertificates = false,
@@ -33,7 +33,7 @@ namespace Demo
 
         public async Task Get()
         {
-            var response = await client.GetAsync(new Uri("https://self-signed.badssl.com")); //https://gorest.co.in/public-api/users?_format=json&access-token=ZsjrVYhueqIMDxIUtMVxFJpecrfqiL3kLY37
+            var response = await client.GetAsync(new Uri("https://gorest.co.in/public-api/users?format=json&access-token=ZsjrVYhueqIMDxIUtMVxFJpecrfqiL3kLY37")); //https://self-signed.badssl.com
 
             Debug.WriteLine(response.Content);
         }

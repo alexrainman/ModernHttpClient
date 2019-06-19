@@ -76,6 +76,7 @@
     <Compile Include="..\ModernHttpClient\SSLConfig.cs">
       <Link>SSLConfig.cs</Link>
     </Compile>
+    <Compile Include="X509Certificate2Extension.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />

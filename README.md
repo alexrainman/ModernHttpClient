@@ -226,6 +226,10 @@ The server name or address could not be resolved
 
 #### Release Notes
 
+2.8.2
+
+[Update] Validating hostname against certificate Subject Alternative Names, if any, in case it doesn't match the CN
+
 2.8.1
 
 [iOS] Timeout using wrong TimeSpan value #31.

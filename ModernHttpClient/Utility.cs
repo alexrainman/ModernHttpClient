@@ -11,7 +11,7 @@ namespace ModernHttpClient
             if (index == -1)
             {
                 // not a pattern, do a direct case-insensitive comparison
-#if __PORTABLE__
+#if __PORTABLE__ || WINDOWS_UWP
                 return (string.Compare(hostname, pattern) == 0);
 #else
                 return (string.Compare(hostname, pattern, true, CultureInfo.InvariantCulture) == 0);
@@ -40,7 +40,7 @@ namespace ModernHttpClient
             int length = hostname.Length - end.Length;
             // no point to check a pattern that is longer than the hostname
             if (length <= 0) return false;
-#if __PORTABLE__
+#if __PORTABLE__ || WINDOWS_UWP
             if (string.Compare(hostname, end) != 0) {
                 return false;
             }
@@ -61,11 +61,11 @@ namespace ModernHttpClient
 
             // match the start of the pattern
             string start = pattern.Substring(0, index);
-#if __PORTABLE__
+#if __PORTABLE__ || WINDOWS_UWP
             return (string.Compare(hostname, start) == 0);
 #else
             return (string.Compare(hostname, 0, start, 0, start.Length, true, CultureInfo.InvariantCulture) == 0);
 #endif
         }
-    }
+    } 
 }

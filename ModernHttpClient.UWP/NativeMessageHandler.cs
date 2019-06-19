@@ -7,6 +7,7 @@ using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
@@ -26,6 +27,8 @@ namespace ModernHttpClient
         private readonly CertificatePinner CertificatePinner;
 
         public NativeMessageHandler() : this(false, new SSLConfig()) { }
+
+        static readonly Regex cnRegex = new Regex(@"CN\s*=\s*([^,]*)", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Singleline);
 
         public NativeMessageHandler(bool throwOnCaptiveNetwork, SSLConfig sSLConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
         {
@@ -63,8 +66,10 @@ namespace ModernHttpClient
                 UseProxy = true;
             }
 
-            this.ServerCertificateCustomValidationCallback = (request, root, chain, errors) =>
+            this.ServerCertificateCustomValidationCallback = (request, root, chain, e) =>
             {
+                var errors = SslPolicyErrors.None;
+
                 if (EnableUntrustedCertificates)
                 {
                     goto sslErrorVerify;
@@ -89,10 +94,24 @@ namespace ModernHttpClient
                     goto sslErrorVerify;
                 }
 
+                var hostname = request.RequestUri.Host;
+
+                var subject = root.Subject;
+                var subjectCn = cnRegex.Match(subject).Groups[1].Value;
+
+                if (string.IsNullOrWhiteSpace(subjectCn) || !Utility.MatchHostnameToPattern(hostname, subjectCn))
+                {
+                    var subjectAn = root.ParseSubjectAlternativeName();
+
+                    if (!subjectAn.Contains(hostname))
+                    {
+                        errors = SslPolicyErrors.RemoteCertificateNameMismatch;
+                        goto sslErrorVerify;
+                    }
+                }
+
                 if (this.CertificatePinner != null)
                 {
-                    var hostname = request.RequestUri.Host;
-
                     if (!this.CertificatePinner.HasPins(hostname))
                     {
                         errors = SslPolicyErrors.RemoteCertificateNameMismatch;
