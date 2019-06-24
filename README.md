@@ -59,6 +59,19 @@ readonly static HttpClient client = new HttpClient(new NativeMessageHandler(fals
 
 If server certificate chain public keys are not provided, the basic server certificate verification will be done.
 
+### Wildcard pattern rules:
+
+- Asterisk * is only permitted in the left-most domain name label and must be the only character in that label (i.e., must match the whole left-most label).
+
+For example, *.example.com is permitted, while *a.example.com, a*.example.com, a*b.example.com, a.*.example.com are not permitted.
+
+- Asterisk * cannot match across domain name labels.
+
+For example, *.example.com matches test.example.com but does not match sub.test.example.com.
+
+- Wildcard patterns for single-label domain names are not permitted.
+
+
 ### How to obtain server certificate chain public keys?
 
 1. In your Android project add Square.OkHttp3 Nuget Package.
