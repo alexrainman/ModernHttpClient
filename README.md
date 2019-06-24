@@ -252,6 +252,10 @@ This matches iOS NSAppTransportSecurity NSExceptionDomains at info.plist:
 
 #### Release Notes
 
+3.3.1
+
+[Android] Allowing TLS with CLEARTEXT simultaneously
+
 3.3.0
 
 Renaming SSLConfig to TLSConfig

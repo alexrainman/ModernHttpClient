@@ -53,14 +53,18 @@ namespace ModernHttpClient
 
             this.TLSConfig = tLSConfig;
 
-            if (!TLSConfig.DangerousAllowInsecureHTTPLoads)
-            {
-                var specsBuilder = new ConnectionSpec.Builder(ConnectionSpec.ModernTls).TlsVersions(TlsVersion.Tls12);
-                var specs = specsBuilder.Build();
+            var tlsSpecBuilder = new ConnectionSpec.Builder(ConnectionSpec.ModernTls).TlsVersions(TlsVersion.Tls12);
+            var tlsSpec = tlsSpecBuilder.Build();
 
-                clientBuilder.ConnectionSpecs(new List<ConnectionSpec>() { specs });
-                clientBuilder.Protocols(new[] { Protocol.Http11 }); // Required to avoid stream was reset: PROTOCOL_ERROR
+            var specs = new List<ConnectionSpec>() { tlsSpec };
+
+            if (TLSConfig.DangerousAllowInsecureHTTPLoads)
+            {
+                specs.Add(ConnectionSpec.Cleartext);
             }
+
+            clientBuilder.ConnectionSpecs(specs);
+            clientBuilder.Protocols(new[] { Protocol.Http11 }); // Required to avoid stream was reset: PROTOCOL_ERROR
 
             // Add Certificate Pins
             if (!TLSConfig.DangerousAcceptAnyServerCertificateValidator &&
