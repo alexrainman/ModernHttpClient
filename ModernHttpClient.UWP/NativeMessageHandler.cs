@@ -5,14 +5,12 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.Security.Cryptography.Certificates;
-using Windows.Web.Http.Filters;
 
 namespace ModernHttpClient
 {
@@ -21,38 +19,43 @@ namespace ModernHttpClient
         readonly bool throwOnCaptiveNetwork;
 
         public bool DisableCaching { get; set; }
-        public bool EnableUntrustedCertificates { get; set; }
+       
         public TimeSpan? Timeout { get; set; }
 
         private readonly CertificatePinner CertificatePinner;
 
-        public NativeMessageHandler() : this(false, new SSLConfig()) { }
+        public readonly TLSConfig TLSConfig;
+
+        public NativeMessageHandler() : this(false, new TLSConfig()) { }
 
         static readonly Regex cnRegex = new Regex(@"CN\s*=\s*([^,]*)", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Singleline);
 
-        public NativeMessageHandler(bool throwOnCaptiveNetwork, SSLConfig sSLConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, TLSConfig tLSConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
+
+            this.TLSConfig = tLSConfig;
 
             // Enforce TLS1.2
             SslProtocols = SslProtocols.Tls12;
 
             // Add Certificate Pins
-            if (sSLConfig.Pins != null &&
-                sSLConfig.Pins.Count > 0 &&
-                sSLConfig.Pins[0].PublicKeys.Count() > 0 &&
-                sSLConfig.Pins[0].PublicKeys[0].StartsWith("sha256/", StringComparison.Ordinal))
+            if (!TLSConfig.DangerousAcceptAnyServerCertificateValidator && 
+                TLSConfig.Pins != null &&
+                TLSConfig.Pins.Count > 0 &&
+                TLSConfig.Pins[0].PublicKeys.Count() > 0 &&
+                TLSConfig.Pins[0].PublicKeys[0].StartsWith("sha256/", StringComparison.Ordinal))
             {
                 this.CertificatePinner = new CertificatePinner();
 
-                foreach (var pin in sSLConfig.Pins)
+                foreach (var pin in TLSConfig.Pins)
                 {
                     this.CertificatePinner.AddPins(pin.Hostname, pin.PublicKeys);
                 }
             }
 
             // Set client credentials
-            SetClientCertificate(sSLConfig.ClientCertificate);
+            SetClientCertificate(TLSConfig.ClientCertificate);
 
             if (cookieHandler != null)
             {
@@ -70,7 +73,7 @@ namespace ModernHttpClient
             {
                 var errors = SslPolicyErrors.None;
 
-                if (EnableUntrustedCertificates)
+                if (TLSConfig.DangerousAcceptAnyServerCertificateValidator)
                 {
                     goto sslErrorVerify;
                 }

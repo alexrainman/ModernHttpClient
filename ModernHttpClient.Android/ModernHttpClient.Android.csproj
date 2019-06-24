@@ -73,10 +73,10 @@
     </Compile>
     <Compile Include="TlsSslSocketFactory.cs" />
     <Compile Include="CertificatePinner.cs" />
-    <Compile Include="..\ModernHttpClient\SSLConfig.cs">
-      <Link>SSLConfig.cs</Link>
-    </Compile>
     <Compile Include="X509Certificate2Extension.cs" />
+    <Compile Include="..\ModernHttpClient\TLSConfig.cs">
+      <Link>TLSConfig.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />

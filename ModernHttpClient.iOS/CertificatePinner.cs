@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace ModernHttpClient
 {
@@ -15,7 +16,16 @@ namespace ModernHttpClient
 
         public bool HasPins(string hostname)
         {
-            return Pins.ContainsKey(hostname);
+            foreach(var pin in Pins)
+            {
+                if (Utility.MatchHostnameToPattern(hostname, pin.Key))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+            //return Pins.ContainsKey(hostname);
         }
 
         public void AddPins(string hostname, string[] pins)
@@ -25,11 +35,13 @@ namespace ModernHttpClient
 
         public bool Check(string hostname, byte[] certificate)
         {
-            if (!Pins.ContainsKey(hostname))
+            if (!HasPins(hostname))
             {
                 Debug.WriteLine($"No certificate pin found for {hostname}");
                 return false;
             }
+
+            hostname = Pins.FirstOrDefault(p => Utility.MatchHostnameToPattern(hostname, p.Key)).Key;
 
             // Get pins
             string[] pins = Pins[hostname];

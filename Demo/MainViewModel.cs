@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Net.Http;
 using System.Threading.Tasks;
 using ModernHttpClient;
@@ -9,13 +10,13 @@ namespace Demo
 {
     public class MainViewModel
     {
-        readonly HttpClient client = new HttpClient(new NativeMessageHandler(false, new SSLConfig()
+        readonly HttpClient client = new HttpClient(new NativeMessageHandler(false, new TLSConfig()
         {
             Pins = new List<Pin>()
             {
                 new Pin()
                 {
-                    Hostname = "gorest.co.in",
+                    Hostname = "*.co.in",
                     PublicKeys = new []
                     {
                         "sha256/MCBrX+0kgfNc/qacknAJ5nojbFIx7kBSJSmXKjJviIg=",
@@ -23,11 +24,12 @@ namespace Demo
                         "sha256/Vjs8r4z+80wjNcr1YKepWQboSIRi63WsWXhIMN+eWys="
                     }
                 }
-            }
+            },
+            DangerousAcceptAnyServerCertificateValidator = false,
+            DangerousAllowInsecureHTTPLoads = false
         })
         {
             DisableCaching = true,
-            EnableUntrustedCertificates = false,
             Timeout = new TimeSpan(0, 0, 9)
         });
 

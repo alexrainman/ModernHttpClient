@@ -46,40 +46,45 @@ namespace ModernHttpClient
         readonly bool throwOnCaptiveNetwork;
 
         public bool DisableCaching { get; set; }
-        public bool EnableUntrustedCertificates { get; set; }
+
         public TimeSpan? Timeout { get; set; }
 
         public readonly CertificatePinner CertificatePinner;
 
         private NSUrlCredential UrlCredential;
 
-        public NativeMessageHandler() : this(false, new SSLConfig()) { }
+        public readonly TLSConfig TLSConfig;
 
-        public NativeMessageHandler(bool throwOnCaptiveNetwork, SSLConfig sSLConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
+        public NativeMessageHandler() : this(false, new TLSConfig()) { }
+
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, TLSConfig tLSConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
 
             var configuration = NSUrlSessionConfiguration.DefaultSessionConfiguration;
+
+            this.TLSConfig = tLSConfig;
 
             // System.Net.ServicePointManager.SecurityProtocol provides a mechanism for specifying supported protocol types
             // for System.Net. Since iOS only provides an API for a minimum and maximum protocol we are not able to port
             // this configuration directly and instead use the specified minimum value when one is specified.
             configuration.TLSMinimumSupportedProtocol = SslProtocol.Tls_1_2;
 
-            if (sSLConfig.Pins != null &&
-                sSLConfig.Pins.Count > 0 &&
-                sSLConfig.Pins[0].PublicKeys.Count() > 0 &&
-                sSLConfig.Pins[0].PublicKeys[0].StartsWith("sha256/", StringComparison.Ordinal))
+            if (!TLSConfig.DangerousAcceptAnyServerCertificateValidator &&
+                TLSConfig.Pins != null &&
+                TLSConfig.Pins.Count > 0 &&
+                TLSConfig.Pins[0].PublicKeys.Count() > 0 &&
+                TLSConfig.Pins[0].PublicKeys[0].StartsWith("sha256/", StringComparison.Ordinal))
             {
                 this.CertificatePinner = new CertificatePinner();
 
-                foreach (var pin in sSLConfig.Pins)
+                foreach (var pin in TLSConfig.Pins)
                 {
                     this.CertificatePinner.AddPins(pin.Hostname, pin.PublicKeys);
                 }
             }
 
-            SetClientCertificate(sSLConfig.ClientCertificate);
+            SetClientCertificate(TLSConfig.ClientCertificate);
 
             // NSUrlSessionConfiguration.DefaultSessionConfiguration uses the default NSHttpCookieStorage.SharedStorage
 
@@ -388,7 +393,7 @@ namespace ModernHttpClient
                 {
                     var errors = SslPolicyErrors.None;
 
-                    if (nativeHandler.EnableUntrustedCertificates)
+                    if (nativeHandler.TLSConfig.DangerousAcceptAnyServerCertificateValidator)
                     {
                         goto sslErrorVerify;
                     }

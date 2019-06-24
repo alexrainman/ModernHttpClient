@@ -2,12 +2,14 @@
 
 namespace ModernHttpClient
 {
-    public class SSLConfig
+    public class TLSConfig
     {
-        public SSLConfig(){}
+        public TLSConfig(){}
 
         public List<Pin> Pins { get; set; }
         public ClientCertificate ClientCertificate { get; set; }
+        public bool DangerousAcceptAnyServerCertificateValidator { get; set; }
+        public bool DangerousAllowInsecureHTTPLoads { get; set; } // to match iOS NSAppTransportSecurity in Android
     }
 
     public class Pin

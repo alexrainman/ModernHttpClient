@@ -34,36 +34,44 @@ namespace ModernHttpClient
             };
 
         public bool DisableCaching { get; set; }
-        public bool EnableUntrustedCertificates { get; set; }
+
         public TimeSpan? Timeout { get; set; }
 
         public readonly CertificatePinner CertificatePinner;
 
         private IKeyManager[] KeyManagers;
 
-        public NativeMessageHandler() : this(false, new SSLConfig()) { }
+        public readonly TLSConfig TLSConfig;
 
-        public NativeMessageHandler(bool throwOnCaptiveNetwork, SSLConfig sSLConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
+        public NativeMessageHandler() : this(false, new TLSConfig()) { }
+
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, TLSConfig tLSConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
 
             var clientBuilder = client.NewBuilder();
 
-            var specsBuilder = new ConnectionSpec.Builder(ConnectionSpec.ModernTls).TlsVersions(TlsVersion.Tls12);
-            var specs = specsBuilder.Build();
+            this.TLSConfig = tLSConfig;
 
-            clientBuilder.ConnectionSpecs(new List<ConnectionSpec>() { specs });
-            clientBuilder.Protocols(new[] { Protocol.Http11 }); // Required to avoid stream was reset: PROTOCOL_ERROR 
+            if (!TLSConfig.DangerousAllowInsecureHTTPLoads)
+            {
+                var specsBuilder = new ConnectionSpec.Builder(ConnectionSpec.ModernTls).TlsVersions(TlsVersion.Tls12);
+                var specs = specsBuilder.Build();
+
+                clientBuilder.ConnectionSpecs(new List<ConnectionSpec>() { specs });
+                clientBuilder.Protocols(new[] { Protocol.Http11 }); // Required to avoid stream was reset: PROTOCOL_ERROR
+            }
 
             // Add Certificate Pins
-            if (sSLConfig.Pins != null &&
-                sSLConfig.Pins.Count > 0 &&
-                sSLConfig.Pins[0].PublicKeys.Count() > 0 &&
-                sSLConfig.Pins[0].PublicKeys[0].StartsWith("sha256/", StringComparison.Ordinal))
+            if (!TLSConfig.DangerousAcceptAnyServerCertificateValidator &&
+                TLSConfig.Pins != null &&
+                TLSConfig.Pins.Count > 0 &&
+                TLSConfig.Pins[0].PublicKeys.Count() > 0 &&
+                TLSConfig.Pins[0].PublicKeys[0].StartsWith("sha256/", StringComparison.Ordinal))
             {
                 this.CertificatePinner = new CertificatePinner();
 
-                foreach (var pin in sSLConfig.Pins)
+                foreach (var pin in TLSConfig.Pins)
                 {
                     this.CertificatePinner.AddPins(pin.Hostname, pin.PublicKeys);
                 }
@@ -72,7 +80,7 @@ namespace ModernHttpClient
             }
 
             // Set client credentials
-            SetClientCertificate(sSLConfig.ClientCertificate);
+            SetClientCertificate(TLSConfig.ClientCertificate);
 
             if (cookieHandler != null) clientBuilder.CookieJar(cookieHandler);
 
@@ -85,6 +93,33 @@ namespace ModernHttpClient
                 var address = new InetSocketAddress(webProxy.Address.Host, webProxy.Address.Port);
                 var jProxy = new Proxy(type, address);
                 clientBuilder.Proxy(jProxy);
+            }
+
+            var sslContext = SSLContext.GetInstance("TLS");
+
+            // Support self-signed certificates
+            if (TLSConfig.DangerousAcceptAnyServerCertificateValidator)
+            {
+                // Install the all-trusting trust manager
+                var trustManager = new CustomX509TrustManager();
+                sslContext.Init(KeyManagers, new ITrustManager[] { trustManager }, new SecureRandom());
+                // Create an ssl socket factory with our all-trusting manager
+                var sslSocketFactory = sslContext.SocketFactory;
+                clientBuilder.SslSocketFactory(sslSocketFactory, trustManager);
+            }
+            else
+            {
+                // Set SslSocketFactory
+                if (Build.VERSION.SdkInt < BuildVersionCodes.Lollipop)
+                {
+                    // Support TLS1.2 on Android versions before Lollipop
+                    clientBuilder.SslSocketFactory(new TlsSslSocketFactory(KeyManagers, null), TlsSslSocketFactory.GetSystemDefaultTrustManager());
+                }
+                else
+                {
+                    sslContext.Init(KeyManagers, null, null);
+                    clientBuilder.SslSocketFactory(sslContext.SocketFactory, TlsSslSocketFactory.GetSystemDefaultTrustManager());
+                }
             }
 
             clientBuilder.HostnameVerifier(new HostnameVerifier(this));
@@ -151,36 +186,9 @@ namespace ModernHttpClient
         {
             var clientBuilder = client.NewBuilder();
 
-            var sslContext = SSLContext.GetInstance("TLS");
+            
 
-            // Support self-signed certificates
-            if (EnableUntrustedCertificates)
-            {
-                // Install the all-trusting trust manager
-                var trustManager = new CustomX509TrustManager();
-                sslContext.Init(KeyManagers, new ITrustManager[] { trustManager }, new SecureRandom());
-                // Create an ssl socket factory with our all-trusting manager
-                var sslSocketFactory = sslContext.SocketFactory;
-                clientBuilder.SslSocketFactory(sslSocketFactory, trustManager);
-
-                // Reset certificate pinner
-                var certificatePinner = new CertificatePinner();
-                clientBuilder.CertificatePinner(certificatePinner.Build());
-            }
-            else
-            {
-                // Set SslSocketFactory
-                if (Build.VERSION.SdkInt < BuildVersionCodes.Lollipop)
-                {
-                    // Support TLS1.2 on Android versions before Lollipop
-                    clientBuilder.SslSocketFactory(new TlsSslSocketFactory(KeyManagers, null), TlsSslSocketFactory.GetSystemDefaultTrustManager());
-                }
-                else
-                {
-                    sslContext.Init(KeyManagers, null, null);
-                    clientBuilder.SslSocketFactory(sslContext.SocketFactory, TlsSslSocketFactory.GetSystemDefaultTrustManager());
-                }
-            }
+           
 
             var java_uri = request.RequestUri.GetComponents(UriComponents.AbsoluteUri, UriFormat.UriEscaped);
             var url = new Java.Net.URL(java_uri);
@@ -401,7 +409,7 @@ namespace ModernHttpClient
         {
             var errors = SslPolicyErrors.None;
 
-            if (nativeHandler.EnableUntrustedCertificates)
+            if (nativeHandler.TLSConfig.DangerousAcceptAnyServerCertificateValidator)
             {
                 goto sslErrorVerify;
             }

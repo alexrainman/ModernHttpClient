@@ -51,8 +51,8 @@
     <Compile Include="..\ModernHttpClient\FailureMessages.cs">
       <Link>FailureMessages.cs</Link>
     </Compile>
-    <Compile Include="..\ModernHttpClient\SSLConfig.cs">
-      <Link>SSLConfig.cs</Link>
+    <Compile Include="..\ModernHttpClient\TLSConfig.cs">
+      <Link>TLSConfig.cs</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

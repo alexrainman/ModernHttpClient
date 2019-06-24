@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <version>3.2.1</version>
+    <version>3.3.0</version>
     <authors>Alex Rainman</authors>
     <owners>Alex Rainman</owners>
     <licenseUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/LICENSE</licenseUrl>
@@ -14,10 +14,15 @@
     <copyright>Copyright Alex Rainman © 2019</copyright>
     <iconUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/download.png</iconUrl>
     <releaseNotes>
+3.3.0
+Renaming SSLConfig to TLSConfig
+Renaming EnableUntrustedCertificates to DangerousAcceptAnyServerCertificateValidator, moving it as a property of TLSConfig
+Adding TLSConfig DangerousAllowInsecureHTTPLoads to enable plaintext HTTP in Android, matching iOS NSAppTransportSecurity $35
+Adding support for wildcard hostname validation #34
 3.2.1
 Cumulative versioning update.
 2.8.2
-[Update] Validating hostname against certificate Subject Alternative Names, if any, in case it doesn't match the CN
+Validating hostname against certificate Subject Alternative Names, if any, in case it doesn't match the CN
 2.8.1
 [iOS] Timeout using wrong TimeSpan value #31.
 [Android] "Trust anchor for certification path not found." with self-signed certificate.
@@ -36,31 +41,31 @@ Adding support for web proxy.
 [iOS] Removing minimumSSLProtocol from NativeMessageHandler ctor
 [UWP] Exception on UWP with Xamarin Forms #3
 2.7.0
-[Update] Migrating to a multi-target project
+Migrating to a multi-target project
 [Android] Calling HttpClient methods should throw .Net Exception when fail #5
 [Android] VerifyHostnameCallback parameter function on constructor (NativeMessageHandler - Android) when customSSLVerification is true #6
 [Android] ReasonPhrase is empty under HTTPS #8
 2.6.0
-[Update] Adding support for UWP
-[Update] Adding support for netstandard 2.0
+Adding support for UWP
+Adding support for netstandard 2.0
 2.5.3
-[Update] Cookies set with the native handler will be merged into the Cookie header
+Cookies set with the native handler will be merged into the Cookie header
 2.5.1
 [Android] NativeCookieHandler, if provided, is set as the default CookieJar for OkHttpClient
-[Update] Adding DeleteCookies, SetCookie and DeleteCookie to NativeCookieHandler
+Adding DeleteCookies, SetCookie and DeleteCookie to NativeCookieHandler
 2.5.0
 [Android] Updating to Square.OkHttp3
 2.4.7
-[Update] Cookies set with the native handler will be merged into the Cookie header
+Cookies set with the native handler will be merged into the Cookie header
 2.4.5
 [Android] NativeCookieHandler, if provided, is set as the default cookie handler for OkHttpClient
-[Update] Adding DeleteCookies, SetCookie and DeleteCookie to NativeCookieHandler
+Adding DeleteCookies, SetCookie and DeleteCookie to NativeCookieHandler
 2.4.4
 [Android] SIGABRT after UnknownHostException #229
 [iOS] Updating obsolete NSUrlSessionDelegate to INSUrlSessionDelegate
-[Update] Adding EnableUntrustedCertificates to support self-signed certificates
+Adding EnableUntrustedCertificates to support self-signed certificates
 2.4.3
-[Update] Adding Timeout property
+Adding Timeout property
 [Android] Updating to Square.OkHttp 2.7.5
 [Android] Timeout value is not respected on Android #192
         </releaseNotes>

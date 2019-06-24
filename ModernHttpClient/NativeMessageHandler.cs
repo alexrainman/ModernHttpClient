@@ -29,12 +29,11 @@ namespace ModernHttpClient
         /// <param name="sSLConfig">To enable TLS Mutual Authentication</param>
         /// <param name="cookieHandler">Enable native cookie handling.
         /// </param>
-        public NativeMessageHandler(bool throwOnCaptiveNetwork, SSLConfig sSLConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null) : base()
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, TLSConfig tLSConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null) : base()
         {
         }
 
         public bool DisableCaching { get; set; }
-        public bool EnableUntrustedCertificates { get; set; }
 
         public TimeSpan? Timeout
         {

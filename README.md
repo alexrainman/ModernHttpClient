@@ -17,7 +17,7 @@ Just reference ModernHttpClient in your .Net Standard or Portable Library, and i
 
 ### What's new?
 
-Use SSLConfig parameter to provide server certificate chain public keys and a client certificate for Mutual TLS Authentication.
+Use TLSConfig parameter to provide server certificate chain public keys and a client certificate for Mutual TLS Authentication.
 
 TLS 1.2 has been enforced.
 
@@ -30,13 +30,13 @@ https://www.brillianceweb.com/resources/answers-to-7-common-questions-about-upgr
 Here's how it works:
 
 ```cs
-readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new SSLConfig()
+readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new TLSConfig()
 {
     Pins = new List<Pin>()
     {
         new Pin()
         {
-            Hostname = "gorest.co.in",
+            Hostname = "*.co.in",
             PublicKeys = new []
             {
                 "sha256/MCBrX+0kgfNc/qacknAJ5nojbFIx7kBSJSmXKjJviIg=",
@@ -125,13 +125,13 @@ SetCookie before making the http call and they will be added to Cookie header in
 ```cs
 NativeCookieHandler cookieHandler = new NativeCookieHandler();
 
-readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new SSLConfig()
+readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new TLSConfig()
 {
     Pins = new List<Pin>()
     {
         new Pin()
         {
-            Hostname = "gorest.co.in",
+            Hostname = "*.co.in",
             PublicKeys = new []
             {
                 "sha256/MCBrX+0kgfNc/qacknAJ5nojbFIx7kBSJSmXKjJviIg=",
@@ -173,13 +173,13 @@ var response = await client.GetAsync(new Uri("https://reqres.in"));
 Just provide the Web Proxy configuration as part of the ctor:
 
 ```cs
-readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new SSLConfig()
+readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new TLSConfig()
 {
     Pins = new List<Pin>()
     {
         new Pin()
         {
-            Hostname = "gorest.co.in",
+            Hostname = "*.co.in",
             PublicKeys = new []
             {
                 "sha256/MCBrX+0kgfNc/qacknAJ5nojbFIx7kBSJSmXKjJviIg=",
@@ -224,7 +224,43 @@ Exception: The text associated with this error code could not be found.
 The server name or address could not be resolved
 ```
 
+### Dangerous Zone
+
+Set TLSConfig ```DangerousAcceptAnyServerCertificateValidator``` to true, particularly in test scenarios, to connect to a server with a certificate that shouldn't be validated, such as a self-signed certificate.
+
+As a side benefit, developers can use this property to make it easier for tools to flag the danger of disabling certificate validation, which makes it easier for developers to avoid shipping insecure applications.
+
+https://docs.microsoft.com/en-us/dotnet/api/system.net.http.httpclienthandler.dangerousacceptanyservercertificatevalidator?view=netframework-4.8
+
+Set TLSConfig ```DangerousAllowInsecureHTTPLoads``` to true to allow plaintext HTTP in Android.
+
+This matches iOS NSAppTransportSecurity NSExceptionDomains at info.plist:
+
+```xml
+<key>NSAppTransportSecurity</key>
+<dict>
+    <key>NSExceptionDomains</key>
+    <dict>
+        <key>gorest.co.in</key>
+        <dict>
+            <key>NSExceptionAllowsInsecureHTTPLoads</key>
+            <true/>
+        </dict>
+    </dict>
+</dict>
+```
+
 #### Release Notes
+
+3.3.0
+
+Renaming SSLConfig to TLSConfig
+
+Renaming EnableUntrustedCertificates to DangerousAcceptAnyServerCertificateValidator, moving it as a property of TLSConfig
+
+Adding TLSConfig DangerousAllowInsecureHTTPLoads to enable plaintext HTTP in Android, matching iOS NSAppTransportSecurity $35
+
+Adding support for wildcard hostname validation #34
 
 3.2.1
 
