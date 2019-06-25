@@ -53,7 +53,7 @@ namespace ModernHttpClient
 
             this.TLSConfig = tLSConfig;
 
-            var tlsSpecBuilder = new ConnectionSpec.Builder(ConnectionSpec.ModernTls).TlsVersions(TlsVersion.Tls12);
+            var tlsSpecBuilder = new ConnectionSpec.Builder(ConnectionSpec.ModernTls).TlsVersions(new[] { TlsVersion.Tls12, TlsVersion.Tls13 });
             var tlsSpec = tlsSpecBuilder.Build();
 
             var specs = new List<ConnectionSpec>() { tlsSpec };

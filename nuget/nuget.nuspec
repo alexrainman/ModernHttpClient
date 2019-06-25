@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <version>3.3.1</version>
+    <version>3.3.2</version>
     <authors>Alex Rainman</authors>
     <owners>Alex Rainman</owners>
     <licenseUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/LICENSE</licenseUrl>
@@ -14,6 +14,8 @@
     <copyright>Copyright Alex Rainman © 2019</copyright>
     <iconUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/download.png</iconUrl>
     <releaseNotes>
+3.3.2
+[Android] Supporting TLS 1.2+
 3.3.1
 [Android] Allowing TLS with CLEARTEXT simultaneously
 3.3.0
