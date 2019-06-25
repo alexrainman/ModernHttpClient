@@ -19,7 +19,7 @@ Just reference ModernHttpClient in your .Net Standard or Portable Library, and i
 
 Use TLSConfig parameter to provide server certificate chain public keys and a client certificate for Mutual TLS Authentication.
 
-TLS 1.2 has been enforced.
+TLS 1.2+ has been enforced.
 
 Read why here:
 
