@@ -57,9 +57,6 @@
     <Compile Include="..\ModernHttpClient\ProgressStreamContent.cs">
       <Link>ProgressStreamContent.cs</Link>
     </Compile>
-    <Compile Include="..\ModernHttpClient\Utility.cs">
-      <Link>Utility.cs</Link>
-    </Compile>
     <Compile Include="CertificatePinner.cs" />
     <Compile Include="SpkiFingerprint.cs" />
     <Compile Include="..\ModernHttpClient\FailureMessages.cs">
@@ -70,6 +67,9 @@
     </Compile>
     <Compile Include="..\ModernHttpClient\TLSConfig.cs">
       <Link>TLSConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\ModernHttpClient.Android\Utility.cs">
+      <Link>Utility.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using ModernHttpClient;
@@ -35,7 +36,7 @@ namespace Demo
 
         public async Task Get()
         {
-            var response = await client.GetAsync(new Uri("http://gorest.co.in/public-api/users?format=json&access-token=ZsjrVYhueqIMDxIUtMVxFJpecrfqiL3kLY37")); //https://self-signed.badssl.com
+            var response = await client.GetAsync(new Uri("https://gorest.co.in/public-api/users?_format=json&access-token=ZpvESa-uwxDolSDuCdONfCBnq1NU1nCKkP5z")); //https://self-signed.badssl.com
 
             Debug.WriteLine(response.Content);
         }

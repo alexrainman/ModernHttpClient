@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Security;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -97,6 +96,12 @@ namespace ModernHttpClient
                 var address = new InetSocketAddress(webProxy.Address.Host, webProxy.Address.Port);
                 var jProxy = new Proxy(type, address);
                 clientBuilder.Proxy(jProxy);
+
+                if (webProxy.Credentials != null)
+                {
+                    var credentials = (NetworkCredential)webProxy.Credentials;
+                    clientBuilder.ProxyAuthenticator(new ProxyAuthenticator(credentials.UserName, credentials.Password));
+                }
             }
 
             var sslContext = SSLContext.GetInstance("TLS");
@@ -188,12 +193,6 @@ namespace ModernHttpClient
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var clientBuilder = client.NewBuilder();
-
-            
-
-           
-
             var java_uri = request.RequestUri.GetComponents(UriComponents.AbsoluteUri, UriFormat.UriEscaped);
             var url = new Java.Net.URL(java_uri);
 
@@ -257,13 +256,13 @@ namespace ModernHttpClient
 
             if (Timeout != null)
             {
+                var clientBuilder = client.NewBuilder();
                 var timeout = (long)Timeout.Value.TotalSeconds;
                 clientBuilder.ConnectTimeout(timeout, TimeUnit.Seconds);
                 clientBuilder.WriteTimeout(timeout, TimeUnit.Seconds);
                 clientBuilder.ReadTimeout(timeout, TimeUnit.Seconds);
+                client = clientBuilder.Build();
             }
-
-            client = clientBuilder.Build();
 
             cancellationToken.ThrowIfCancellationRequested();
 

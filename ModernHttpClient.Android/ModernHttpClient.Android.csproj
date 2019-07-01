@@ -65,9 +65,6 @@
     <Compile Include="..\ModernHttpClient\ReasonPhrases.cs">
       <Link>ReasonPhrases.cs</Link>
     </Compile>
-    <Compile Include="..\ModernHttpClient\Utility.cs">
-      <Link>Utility.cs</Link>
-    </Compile>
     <Compile Include="..\ModernHttpClient\FailureMessages.cs">
       <Link>FailureMessages.cs</Link>
     </Compile>
@@ -77,6 +74,8 @@
     <Compile Include="..\ModernHttpClient\TLSConfig.cs">
       <Link>TLSConfig.cs</Link>
     </Compile>
+    <Compile Include="Utility.cs" />
+    <Compile Include="ProxyAuthenticator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />

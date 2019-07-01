@@ -120,6 +120,9 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\ModernHttpClient.Android\Utility.cs">
+      <Link>Utility.cs</Link>
+    </Compile>
     <Compile Include="..\ModernHttpClient.Android\X509Certificate2Extension.cs">
       <Link>X509Certificate2Extension.cs</Link>
     </Compile>
@@ -134,9 +137,6 @@
     </Compile>
     <Compile Include="..\ModernHttpClient\TLSConfig.cs">
       <Link>TLSConfig.cs</Link>
-    </Compile>
-    <Compile Include="..\ModernHttpClient\Utility.cs">
-      <Link>Utility.cs</Link>
     </Compile>
     <Compile Include="HttpRequestHeadersExtensions.cs" />
     <Compile Include="NativeCookieHandler.cs" />

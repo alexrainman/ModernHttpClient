@@ -1,20 +1,19 @@
 using System;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Threading;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using Foundation;
 using ModernHttpClient.CoreFoundation;
 using ModernHttpClient.Foundation;
-
-using Foundation;
 using Security;
-using System.Text;
 
 namespace ModernHttpClient
 {
@@ -107,8 +106,30 @@ namespace ModernHttpClient
                     NSObject.FromObject("HTTPSEnable")
                 };
 
-                NSDictionary proxyDict = NSDictionary.FromObjectsAndKeys(values, keys);
+                var proxyDict = NSDictionary.FromObjectsAndKeys(values, keys);
                 configuration.ConnectionProxyDictionary = proxyDict;
+
+                if (webProxy.Credentials != null)
+                {
+                    var credentials = (NetworkCredential)webProxy.Credentials;
+
+                    var authData = string.Format("{0}:{1}", credentials.UserName, credentials.Password);
+                    var authHeaderValue = Convert.ToBase64String(Encoding.UTF8.GetBytes(authData));
+
+                    NSObject[] hValues =
+                    {
+                        NSObject.FromObject(authHeaderValue)
+                    };
+
+                    NSObject[] hKeys =
+                    {
+                        NSObject.FromObject("Proxy-Authorization")
+                    };
+
+                    var headers = NSDictionary.FromObjectsAndKeys(hValues, hKeys);
+
+                    configuration.HttpAdditionalHeaders = headers;
+                } 
             }
 
             var urlSessionDelegate = new DataTaskDelegate(this);
