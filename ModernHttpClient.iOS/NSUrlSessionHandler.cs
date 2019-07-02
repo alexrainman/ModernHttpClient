@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Foundation;
 using ModernHttpClient.CoreFoundation;
 using ModernHttpClient.Foundation;
+using ObjCRuntime;
 using Security;
 
 namespace ModernHttpClient
@@ -265,6 +266,8 @@ namespace ModernHttpClient
             return await ret.Task.ConfigureAwait(false);
         }
 
+        // TODO: add INSUrlSessionTaskDelegate interface
+
         class DataTaskDelegate : NSUrlSessionDataDelegate, INSUrlSessionDelegate
         {
             NativeMessageHandler nativeHandler { get; set; }
@@ -389,6 +392,8 @@ namespace ModernHttpClient
 
             public override void DidReceiveChallenge(NSUrlSession session, NSUrlSessionTask task, NSUrlAuthenticationChallenge challenge, Action<NSUrlSessionAuthChallengeDisposition, NSUrlCredential> completionHandler)
             {
+                // TODO: add NSUrlProtectionSpace.HTTPSProxy case
+
                 if (challenge.ProtectionSpace.AuthenticationMethod == NSUrlProtectionSpace.AuthenticationMethodNTLM)
                 {
                     NetworkCredential credentialsToUse;
