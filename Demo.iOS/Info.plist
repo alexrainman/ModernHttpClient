@@ -5,7 +5,7 @@
 	<key>CFBundleName</key>
 	<string>Demo.iOS</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.slbdev.demo.Demo-iOS</string>
+	<string>com.softprize.demo.iOS</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>

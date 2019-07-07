@@ -25,7 +25,6 @@ namespace ModernHttpClient
             }
 
             return false;
-            //return Pins.ContainsKey(hostname);
         }
 
         public void AddPins(string hostname, string[] pins)
@@ -45,6 +44,12 @@ namespace ModernHttpClient
 
             // Get pins
             string[] pins = Pins[hostname];
+
+            // Skip pinning with empty array
+            if (pins == null || pins.Length == 0)
+            {
+                return true;
+            }
 
             // Compute spki fingerprint
             var spkiFingerprint = SpkiFingerprint.Compute(certificate);
