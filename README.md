@@ -91,7 +91,7 @@ readonly static HttpClient client = new HttpClient(new NativeMessageHandler(fals
         new Pin()
         {
             Hostname = "example.com",
-            PublicKeys = new []{}
+            PublicKeys = new []{} // Skip pinning for specific domain with empty pins array
         }
     },
     ClientCertificate = new ClientCertificate()
