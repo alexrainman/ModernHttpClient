@@ -26,10 +26,9 @@ namespace Demo
                     }
                 }
             },
-            DangerousAcceptAnyServerCertificateValidator = true,
+            DangerousAcceptAnyServerCertificateValidator = false,
             DangerousAllowInsecureHTTPLoads = true
-        }, null,
-            new WebProxy("100.106.53.232:8888",false))
+        })
         {
             DisableCaching = true,
             Timeout = new TimeSpan(0, 0, 9)

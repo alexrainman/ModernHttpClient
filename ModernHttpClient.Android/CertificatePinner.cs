@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
 
 namespace ModernHttpClient
 {
@@ -34,6 +36,7 @@ namespace ModernHttpClient
 
         public void AddPins(string hostname, string[] pins)
         {
+            Utility.VerifyPins(pins);
             Pins[hostname] = pins;
             Builder.Add(hostname, pins);
         }

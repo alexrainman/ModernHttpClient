@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 
 namespace ModernHttpClient
 {
@@ -29,6 +30,7 @@ namespace ModernHttpClient
 
         public void AddPins(string hostname, string[] pins)
         {
+            Utility.VerifyPins(pins);
             Pins[hostname] = pins;
         }
 

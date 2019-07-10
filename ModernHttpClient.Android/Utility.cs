@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
+using System.Net.Http;
 
 namespace ModernHttpClient
 {
@@ -69,6 +71,26 @@ namespace ModernHttpClient
 #else
             return (string.Compare(hostname, 0, start, 0, start.Length, true, CultureInfo.InvariantCulture) == 0);
 #endif
+        }
+
+        public static void VerifyPins(string[] pins)
+        {
+            foreach (var pin in pins)
+            {
+                if (!pin.StartsWith("sha256/", StringComparison.Ordinal))
+                {
+                    throw new HttpRequestException(FailureMessages.InvalidPublicKey);
+                }
+
+                try
+                {
+                    byte[] bytes = Convert.FromBase64String(pin.Remove(0, 7));
+                }
+                catch (Exception ex)
+                {
+                    throw new HttpRequestException(FailureMessages.InvalidPublicKey, ex);
+                }
+            }
         }
     } 
 }

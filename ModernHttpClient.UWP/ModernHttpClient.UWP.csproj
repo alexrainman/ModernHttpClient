@@ -135,6 +135,9 @@
     <Compile Include="..\ModernHttpClient\CaptiveNetworkException.cs">
       <Link>CaptiveNetworkException.cs</Link>
     </Compile>
+    <Compile Include="..\ModernHttpClient\FailureMessages.cs">
+      <Link>FailureMessages.cs</Link>
+    </Compile>
     <Compile Include="..\ModernHttpClient\TLSConfig.cs">
       <Link>TLSConfig.cs</Link>
     </Compile>

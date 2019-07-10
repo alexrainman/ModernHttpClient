@@ -72,9 +72,7 @@ namespace ModernHttpClient
 
             if (!TLSConfig.DangerousAcceptAnyServerCertificateValidator &&
                 TLSConfig.Pins != null &&
-                TLSConfig.Pins.Count > 0 &&
-                TLSConfig.Pins[0].PublicKeys.Count() > 0 &&
-                TLSConfig.Pins[0].PublicKeys[0].StartsWith("sha256/", StringComparison.Ordinal))
+                TLSConfig.Pins.Count > 0)
             {
                 this.CertificatePinner = new CertificatePinner();
 
@@ -141,7 +139,16 @@ namespace ModernHttpClient
         {
             if (certificate == null) return;
 
-            var bytes = Convert.FromBase64String(certificate.RawData);
+            byte[] bytes;
+
+            try
+            {
+                bytes = Convert.FromBase64String(certificate.RawData);
+            }
+            catch (Exception ex)
+            {
+                throw new HttpRequestException(FailureMessages.InvalidRawData, ex);
+            }
 
             var options = NSDictionary.FromObjectsAndKeys(new object[] { certificate.Passphrase }, new object[] { "passphrase" });
             var status = SecImportExport.ImportPkcs12(bytes, options, out NSDictionary[] items);
