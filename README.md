@@ -71,6 +71,40 @@ For example, *.example.com matches test.example.com but does not match sub.test.
 
 - Wildcard patterns for single-label domain names are not permitted.
 
+### Skip pinning for specific domain with empty pins array
+
+```cs
+readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new TLSConfig()
+{
+    Pins = new List<Pin>()
+    {
+        new Pin()
+        {
+            Hostname = "*.co.in",
+            PublicKeys = new []
+            {
+                "sha256/MCBrX+0kgfNc/qacknAJ5nojbFIx7kBSJSmXKjJviIg=",
+                "sha256/YLh1dUR9y6Kja30RrAn7JKnbQG/uEtLMkBgFF2Fuihg=",
+                "sha256/Vjs8r4z+80wjNcr1YKepWQboSIRi63WsWXhIMN+eWys="
+            }
+        },
+        new Pin()
+        {
+            Hostname = "example.com",
+            PublicKeys = new []{}
+        }
+    },
+    ClientCertificate = new ClientCertificate()
+    {
+        RawData = "PFX_DATA",
+        Passphrase = "PFX_PASSPHRASE"
+    }
+})
+{
+    DisableCaching = true,
+    Timeout = new TimeSpan(0, 0, 9)
+});
+```
 
 ### How to obtain server certificate chain public keys?
 
