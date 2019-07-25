@@ -69,6 +69,20 @@ namespace ModernHttpClient
             return nc;
         }
 
+        private bool PathMatches(string path, string cookiePath) //per update 6265 rules
+        {
+            if (path == cookiePath)
+                return true;
+            if (System.String.IsNullOrEmpty(path) || System.String.IsNullOrEmpty(cookiePath))
+                return false;
+            if (path.StartsWith(cookiePath) && cookiePath.EndsWith("/"))
+                return true;
+            if (path.StartsWith(cookiePath) && path.Substring(cookiePath.Length).StartsWith("/"))
+                return true;
+
+            return false;
+        }
+
         public IList<Square.OkHttp3.Cookie> LoadForRequest(Square.OkHttp3.HttpUrl p0)
         {
             var cookies = new List<Square.OkHttp3.Cookie>();
@@ -76,15 +90,18 @@ namespace ModernHttpClient
             var nc = CookieStore.Get(p0.Uri());
             foreach(var cookie in nc)
             {
-                var builder = new Square.OkHttp3.Cookie.Builder();
-                builder.Name(cookie.Name)
-                       .Value(cookie.Value)
-                       .Domain(cookie.Domain)
-                       .Path(cookie.Path);
-                if (cookie.Secure)
-                    builder.Secure();
+                if (PathMatches(p0.EncodedPath(), cookie.Path))
+                {
+	                var builder = new Square.OkHttp3.Cookie.Builder();
+	                builder.Name(cookie.Name)
+	                       .Value(cookie.Value)
+	                       .Domain(cookie.Domain)
+	                       .Path(cookie.Path);
+	                if (cookie.Secure)
+	                    builder.Secure();
                 
-                cookies.Add(builder.Build());
+	                cookies.Add(builder.Build());
+                }
             }
 
             return cookies;
