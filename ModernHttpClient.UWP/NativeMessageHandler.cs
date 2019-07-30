@@ -30,21 +30,21 @@ namespace ModernHttpClient
 
         static readonly Regex cnRegex = new Regex(@"CN\s*=\s*([^,]*)", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Singleline);
 
-		private bool PathMatches(string path, string cookiePath) //per update 6265 rules
-		{
-			if (path == cookiePath)
-				return true;
-			if (System.String.IsNullOrEmpty(path) || System.String.IsNullOrEmpty(cookiePath))
-				return false;
-			if (path.StartsWith(cookiePath) && cookiePath.EndsWith("/"))
-				return true;
-			if (path.StartsWith(cookiePath) && path.Substring(cookiePath.Length).StartsWith("/"))
-				return true;
+        private bool PathMatches(string path, string cookiePath) //per update 6265 rules
+        {
+            if (path == cookiePath)
+                return true;
+            if (System.String.IsNullOrEmpty(path) || System.String.IsNullOrEmpty(cookiePath))
+                return false;
+            if (path.StartsWith(cookiePath) && cookiePath.EndsWith("/"))
+                return true;
+            if (path.StartsWith(cookiePath) && path.Substring(cookiePath.Length).StartsWith("/"))
+                return true;
 
-			return false;
-		}
+            return false;
+        }
 
-		public NativeMessageHandler(bool throwOnCaptiveNetwork, TLSConfig tLSConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
+        public NativeMessageHandler(bool throwOnCaptiveNetwork, TLSConfig tLSConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
 
@@ -186,17 +186,17 @@ namespace ModernHttpClient
 
             if (nativeCookieHandler != null)
             {
-				if (nativeCookieHandler.Cookie != null)
+                if (nativeCookieHandler.Cookie != null)
                 {
-					var cookies = nativeCookieHandler.Cookies
-								 .Where(c => c.Domain == request.RequestUri.Host)
-								 .Where(c => PathMatches(request.RequestUri.AbsolutePath, c.Path))
-								 .ToList();
+                    var cookies = nativeCookieHandler.Cookies
+                                 .Where(c => c.Domain == request.RequestUri.Host)
+                                 .Where(c => PathMatches(request.RequestUri.AbsolutePath, c.Path))
+                                 .ToList();
 
-					foreach (var cookie in cookies)
-					{
-						stringBuilder.Append(cookie.Name + "=" + cookie.Value + ";");
-					}
+                    foreach (var cookie in cookies)
+                    {
+                        stringBuilder.Append(cookie.Name + "=" + cookie.Value + ";");
+                    }
                 }
 
                 var headers = request.Headers;
