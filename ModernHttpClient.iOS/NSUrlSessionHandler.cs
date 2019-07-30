@@ -55,6 +55,20 @@ namespace ModernHttpClient
 
         public readonly TLSConfig TLSConfig;
 
+        private bool PathMatches(string path, string cookiePath) //per update 6265 rules
+        {
+            if (path == cookiePath)
+                return true;
+            if (System.String.IsNullOrEmpty(path) || System.String.IsNullOrEmpty(cookiePath))
+                return false;
+            if (path.StartsWith(cookiePath) && cookiePath.EndsWith("/"))
+                return true;
+            if (path.StartsWith(cookiePath) && path.Substring(cookiePath.Length).StartsWith("/"))
+                return true;
+
+            return false;
+        }
+
         public NativeMessageHandler() : this(false, new TLSConfig()) { }
 
         public NativeMessageHandler(bool throwOnCaptiveNetwork, TLSConfig tLSConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
@@ -211,6 +225,7 @@ namespace ModernHttpClient
 
             var cookies = NSHttpCookieStorage.SharedStorage.Cookies
                                              .Where(c => c.Domain == request.RequestUri.Host)
+                                             .Where(c => PathMatches(request.RequestUri.AbsolutePath,c.Path))
                                              .ToList();
             foreach (var cookie in cookies)
             {

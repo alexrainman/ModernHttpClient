@@ -30,7 +30,21 @@ namespace ModernHttpClient
 
         static readonly Regex cnRegex = new Regex(@"CN\s*=\s*([^,]*)", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Singleline);
 
-        public NativeMessageHandler(bool throwOnCaptiveNetwork, TLSConfig tLSConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
+		private bool PathMatches(string path, string cookiePath) //per update 6265 rules
+		{
+			if (path == cookiePath)
+				return true;
+			if (System.String.IsNullOrEmpty(path) || System.String.IsNullOrEmpty(cookiePath))
+				return false;
+			if (path.StartsWith(cookiePath) && cookiePath.EndsWith("/"))
+				return true;
+			if (path.StartsWith(cookiePath) && path.Substring(cookiePath.Length).StartsWith("/"))
+				return true;
+
+			return false;
+		}
+
+		public NativeMessageHandler(bool throwOnCaptiveNetwork, TLSConfig tLSConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
         {
             this.throwOnCaptiveNetwork = throwOnCaptiveNetwork;
 
@@ -172,15 +186,17 @@ namespace ModernHttpClient
 
             if (nativeCookieHandler != null)
             {
-                var cookies = nativeCookieHandler.Cookies;
-
-                if (cookies != null)
+				if (nativeCookieHandler.Cookie != null)
                 {
-                    foreach (var cookie in cookies)
-                    {
-                        if (cookie != null)
-                            stringBuilder.Append(cookie.Name + "=" + cookie.Value + ";");
-                    }
+					var cookies = nativeCookieHandler.Cookies
+								 .Where(c => c.Domain == request.RequestUri.Host)
+								 .Where(c => PathMatches(request.RequestUri.AbsolutePath, c.Path))
+								 .ToList();
+
+					foreach (var cookie in cookies)
+					{
+						stringBuilder.Append(cookie.Name + "=" + cookie.Value + ";");
+					}
                 }
 
                 var headers = request.Headers;
