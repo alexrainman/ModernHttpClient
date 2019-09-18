@@ -279,13 +279,13 @@ As a side benefit, developers can use this property to make it easier for tools 
 
 https://docs.microsoft.com/en-us/dotnet/api/system.net.http.httpclienthandler.dangerousacceptanyservercertificatevalidator?view=netframework-4.8
 
-Enabling ```CLEARTEXT``` traffic:
+### Enabling CLEARTEXT traffic:
 
-### ANDROID
+#### Android
 
-In Android Sdk < Lollipop, CLEARTEXT traffic is enabled by default but, in Lollipop and above it needs to be enabled in the AndroidManifest.xml file.
+In Android Sdk < Lollipop, CLEARTEXT traffic is enabled by default. In Lollipop and above it needs to be enabled in the AndroidManifest.xml file.
 
-#### Just change the cleartextTrafficPermitted to true in manifest:
+1. Change the cleartextTrafficPermitted to true in manifest:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -302,9 +302,9 @@ In Android Sdk < Lollipop, CLEARTEXT traffic is enabled by default but, in Lolli
 
 This may appear to fix the problem but it opens a threat to data integrity.
 
-#### Adding Network Security Config xml file in manifest:
+2. Adding Network Security Config xml file in manifest:
 
-1. Create the Network security config.xml in resource xml folder
+- Create the Network security config.xml in resource xml folder
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -315,7 +315,7 @@ This may appear to fix the problem but it opens a threat to data integrity.
 </network-security-config>
 ```
 
-2. Add the Network security config.xml in manifest like following
+- Add the Network security config.xml in manifest like following
 
 ```xml
 <application
@@ -342,7 +342,7 @@ Adding NSAppTransportSecurity NSExceptionDomains at info.plist:
 </dict>
 ```
 
-But still at the end of the day, better use a secure network traffic rather than cleartext.
+Note: better use a secure network traffic rather than cleartext.
 
 #### Release Notes
 
