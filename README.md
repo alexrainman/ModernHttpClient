@@ -271,7 +271,7 @@ Exception: The text associated with this error code could not be found.
 The server name or address could not be resolved
 ```
 
-### Dangerous Zone
+## Dangerous Zone
 
 Set TLSConfig ```DangerousAcceptAnyServerCertificateValidator``` to true, particularly in test scenarios, to connect to a server with a certificate that shouldn't be validated, such as a self-signed certificate.
 
@@ -279,9 +279,54 @@ As a side benefit, developers can use this property to make it easier for tools 
 
 https://docs.microsoft.com/en-us/dotnet/api/system.net.http.httpclienthandler.dangerousacceptanyservercertificatevalidator?view=netframework-4.8
 
-Set TLSConfig ```DangerousAllowInsecureHTTPLoads``` to true to allow plaintext HTTP in Android.
+Enabling ```CLEARTEXT``` traffic:
 
-This matches iOS NSAppTransportSecurity NSExceptionDomains at info.plist:
+### ANDROID
+
+In Android Sdk < Lollipop, CLEARTEXT traffic is enabled by default but, in Lollipop and above it needs to be enabled in the AndroidManifest.xml file.
+
+#### Just change the cleartextTrafficPermitted to true in manifest:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest ...>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application
+        ...
+        android:usesCleartextTraffic="true"
+        ...>
+        ...
+    </application>
+</manifest>
+```
+
+This may appear to fix the problem but it opens a threat to data integrity.
+
+#### Adding Network Security Config xml file in manifest:
+
+1. Create the Network security config.xml in resource xml folder
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">your.domain.com</domain>
+    </domain-config>
+</network-security-config>
+```
+
+2. Add the Network security config.xml in manifest like following
+
+```xml
+<application
+    android:name=".MyApplication"
+    android:networkSecurityConfig="@xml/network_security_config"
+... />
+```
+
+### iOS
+
+Adding NSAppTransportSecurity NSExceptionDomains at info.plist:
 
 ```xml
 <key>NSAppTransportSecurity</key>
@@ -297,7 +342,43 @@ This matches iOS NSAppTransportSecurity NSExceptionDomains at info.plist:
 </dict>
 ```
 
+But still at the end of the day, better use a secure network traffic rather than cleartext.
+
 #### Release Notes
+
+3.4.0
+
+[Android] Deprecating DangerousAllowInsecureHTTPLoads
+
+[Android] Enabling TLS in pre-Lollipop
+
+[Android] CLEARTEXT will be enabled by default in pre-Lollipop
+
+[Android] To enable CLEARTEXT in Lollipop and above, usesCleartextTraffic or networkSecurityConfig are needed
+
+[Update] Refactoring CertificatePinner to match Android OkHttp
+
+[Update] Adding CertificateOnly and PublicKeysOnly pinning modes
+
+[Update] Default pinning mode set to CertificateOnly
+
+[Update] Pinning mode set to PublicKeysOnly if at least pins for one domain are provided
+
+[Update] MatchHostnameToPattern applied to all alternative names when validating hostname
+
+[Update] Performing cookie path-checking before adding them to the cookie collection (PR by @phdonnelly)
+
+3.3.4
+
+[Update] Skip pinning for specific domain with empty pins array
+
+[Update] Validating pins and client certificate base64 string
+
+3.3.3
+
+[Update] Adding support for Proxy-Authorization
+
+[UWP] Pin wildcard hostnames #34
 
 3.3.2
 
