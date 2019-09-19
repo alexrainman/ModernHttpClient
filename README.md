@@ -370,7 +370,7 @@ Note: better use a secure network traffic rather than cleartext.
 
 [Update] Pinning mode set to PublicKeysOnly if at least pins for one domain are provided
 
-[Update] MatchHostnameToPattern applied to all alternative names when validating hostname
+[Update] MatchHostnameToPattern applied to all alternative names when validating hostname (Tip by Logan2014)
 
 [Update] Performing cookie path-checking before adding them to the cookie collection (PR by @phdonnelly)
 
