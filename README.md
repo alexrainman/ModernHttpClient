@@ -23,7 +23,7 @@ Introducing two pinning modes:
 
 - PublicKeysOnly: used if at least pins for one domain are provided.
 
-In Android, CLEARTEXT will be enabled by default in pre-Lollipop devices. To enable CLEARTEXT in Lollipop and above, usesCleartextTraffic or networkSecurityConfig are needed.
+In Android, CLEARTEXT will be enabled by default in pre-Lollipop devices. To enable CLEARTEXT in Lollipop and above, usesCleartextTraffic or networkSecurityConfig is needed.
 
 Enabling TLS in pre-Lollipop devices.
 
@@ -360,7 +360,7 @@ Note: better use a secure network traffic rather than cleartext.
 
 [Android] CLEARTEXT will be enabled by default in pre-Lollipop
 
-[Android] To enable CLEARTEXT in Lollipop and above, usesCleartextTraffic or networkSecurityConfig are needed
+[Android] To enable CLEARTEXT in Lollipop and above, usesCleartextTraffic or networkSecurityConfig is needed
 
 [Update] Refactoring CertificatePinner to match Android OkHttp
 
