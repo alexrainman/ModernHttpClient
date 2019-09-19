@@ -21,7 +21,7 @@ Introducing two pinning modes:
 
 - CertificateOnly (default)
 
-- PublicKeysOnly: used if at least pins for one domain are provided.
+- PublicKeysOnly: used if at least pins for one domain are provided (sha256, sha1 and md5 public keys are supported).
 
 In Android, CLEARTEXT will be enabled by default in pre-Lollipop devices. To enable CLEARTEXT in Lollipop and above, usesCleartextTraffic or networkSecurityConfig is needed.
 
@@ -351,6 +351,10 @@ Adding NSAppTransportSecurity NSExceptionDomains at info.plist:
 Note: better use a secure network traffic rather than cleartext.
 
 #### Release Notes
+
+3.4.1
+
+[Update] Supporting public keys in sha256, sha1 and md5 formats
 
 3.4.0
 

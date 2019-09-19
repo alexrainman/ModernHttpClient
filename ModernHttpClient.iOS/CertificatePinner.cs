@@ -56,13 +56,33 @@ namespace ModernHttpClient
 
             foreach(var certificate in peerCertificates)
             {
-                // Compute spki fingerprint
-                var spkiFingerprint = SpkiFingerprint.Compute(certificate.RawData);
+                // Compute sha256
+                var sha256Fingerprint = SpkiFingerprint.ComputeSHA256(certificate.RawData);
 
-                // Check pin
-                if (Array.IndexOf(pins, spkiFingerprint) > -1)
+                // Check pins for sha256
+                if (Array.IndexOf(pins, sha256Fingerprint) > -1)
                 {
-                    Debug.WriteLine($"Certificate pin {spkiFingerprint} is ok for {hostname}");
+                    Debug.WriteLine($"Certificate pin {sha256Fingerprint} is ok for {hostname}");
+                    return true;
+                }
+
+                // Compute sha1
+                var sha1Fingerprint = SpkiFingerprint.ComputeSHA1(certificate.RawData);
+
+                // Check pins for sha1
+                if (Array.IndexOf(pins, sha1Fingerprint) > -1)
+                {
+                    Debug.WriteLine($"Certificate pin {sha1Fingerprint} is ok for {hostname}");
+                    return true;
+                }
+
+                // Compute md5
+                var md5Fingerprint = SpkiFingerprint.ComputeMD5(certificate.RawData);
+
+                // Check pins for md5
+                if (Array.IndexOf(pins, md5Fingerprint) > -1)
+                {
+                    Debug.WriteLine($"Certificate pin {md5Fingerprint} is ok for {hostname}");
                     return true;
                 }
             }

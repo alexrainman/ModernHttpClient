@@ -75,7 +75,7 @@ namespace ModernHttpClient
         {
             foreach (var pin in pins)
             {
-                if (!pin.StartsWith("sha256/", StringComparison.Ordinal))
+                if (!pin.StartsWith("sha256/", StringComparison.Ordinal) && !pin.StartsWith("sha1/", StringComparison.Ordinal) && !pin.StartsWith("md5/", StringComparison.Ordinal))
                 {
                     throw new HttpRequestException(FailureMessages.InvalidPublicKey);
                 }
