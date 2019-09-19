@@ -17,17 +17,19 @@ Just reference ModernHttpClient in your .Net Standard or Portable Library, and i
 
 ### What's new?
 
-Use TLSConfig parameter to provide server certificate chain public keys and a client certificate for Mutual TLS Authentication.
+Introducing two pinning modes:
 
-TLS 1.2+ has been enforced.
+- CertificateOnly (default)
 
-Read why here:
+- PublicKeysOnly: used if at least pins for one domain are provided.
 
-https://www.brillianceweb.com/resources/answers-to-7-common-questions-about-upgrading-to-tls-1.2/
+In Android, CLEARTEXT will be enabled by default in pre-Lollipop devices. To enable CLEARTEXT in Lollipop and above, usesCleartextTraffic or networkSecurityConfig are needed.
+
+Enabling TLS in pre-Lollipop devices.
 
 ### Usage
 
-Here's how it works:
+Use TLSConfig parameter to provide server certificate chain public keys and a client certificate for Mutual TLS Authentication.
 
 ```cs
 readonly static HttpClient client = new HttpClient(new NativeMessageHandler(false, new TLSConfig()
@@ -57,7 +59,11 @@ readonly static HttpClient client = new HttpClient(new NativeMessageHandler(fals
 });
 ```
 
-If server certificate chain public keys are not provided, the basic server certificate verification will be done.
+TLS 1.2+ has been enforced.
+
+Read why here:
+
+https://www.brillianceweb.com/resources/answers-to-7-common-questions-about-upgrading-to-tls-1.2/
 
 ### Wildcard pattern rules:
 
