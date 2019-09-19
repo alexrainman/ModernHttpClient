@@ -18,16 +18,15 @@ namespace Demo
                 new Pin()
                 {
                     Hostname = "*.co.in",
-                    PublicKeys = new []
+                    PublicKeys = new string []
                     {
-                        "sha256/MCBrX+0kgfNc/qacknAJ5nojbFIx7kBSJSmXKjJviIg=",
+                        "sha256/2h5EszuV4ZbJj5RN705JWhhz3IwFCmRuj8RW1mpu218=",
                         "sha256/YLh1dUR9y6Kja30RrAn7JKnbQG/uEtLMkBgFF2Fuihg=",
                         "sha256/Vjs8r4z+80wjNcr1YKepWQboSIRi63WsWXhIMN+eWys="
                     }
                 }
             },
-            DangerousAcceptAnyServerCertificateValidator = false,
-            DangerousAllowInsecureHTTPLoads = true
+            DangerousAcceptAnyServerCertificateValidator = false
         })
         {
             DisableCaching = true,

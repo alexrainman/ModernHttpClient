@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -26,7 +28,9 @@ namespace ModernHttpClient
 
         public readonly TLSConfig TLSConfig;
 
-        public NativeMessageHandler() : this(false, new TLSConfig()) { }
+		public readonly string PinningMode = "CertificateOnly";
+
+		public NativeMessageHandler() : this(false, new TLSConfig()) { }
 
         static readonly Regex cnRegex = new Regex(@"CN\s*=\s*([^,]*)", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Singleline);
 
@@ -42,9 +46,12 @@ namespace ModernHttpClient
             // Add Certificate Pins
             if (!TLSConfig.DangerousAcceptAnyServerCertificateValidator && 
                 TLSConfig.Pins != null &&
-                TLSConfig.Pins.Count > 0)
+                TLSConfig.Pins.Count > 0 &&
+                TLSConfig.Pins.FirstOrDefault(p => p.PublicKeys.Count() > 0) != null)
             {
-                this.CertificatePinner = new CertificatePinner();
+				this.PinningMode = "PublicKeysOnly";
+
+				this.CertificatePinner = new CertificatePinner();
 
                 foreach (var pin in TLSConfig.Pins)
                 {
@@ -76,54 +83,69 @@ namespace ModernHttpClient
                     goto sslErrorVerify;
                 }
 
-                // Build certificate chain and check for errors
-                if (chain == null || chain.ChainElements.Count == 0)
-                {//no cert at all
-                    errors = SslPolicyErrors.RemoteCertificateNotAvailable;
-                    goto sslErrorVerify;
-                }
-
-                if (chain.ChainElements.Count == 1)
-                {//no root?
-                    errors = SslPolicyErrors.RemoteCertificateChainErrors;
-                    goto sslErrorVerify;
-                }
-
-                if (!chain.Build(root))
-                {
-                    errors = SslPolicyErrors.RemoteCertificateChainErrors;
-                    goto sslErrorVerify;
-                }
-
                 var hostname = request.RequestUri.Host;
 
-                var subject = root.Subject;
-                var subjectCn = cnRegex.Match(subject).Groups[1].Value;
+                var netCerts = new List<X509Certificate2>();
 
-                if (string.IsNullOrWhiteSpace(subjectCn) || !Utility.MatchHostnameToPattern(hostname, subjectCn))
+                foreach(var element in chain.ChainElements)
                 {
-                    var subjectAn = root.ParseSubjectAlternativeName();
-
-                    if (!subjectAn.Contains(hostname))
-                    {
-                        errors = SslPolicyErrors.RemoteCertificateNameMismatch;
-                        goto sslErrorVerify;
-                    }
+                    netCerts.Add(element.Certificate);
                 }
 
-                if (this.CertificatePinner != null)
-                {
-                    if (!this.CertificatePinner.HasPins(hostname))
-                    {
-                        errors = SslPolicyErrors.RemoteCertificateNameMismatch;
-                        goto sslErrorVerify;
-                    }
+                switch (this.PinningMode)
+				{
+					case "CertificateOnly":
 
-                    if (!this.CertificatePinner.Check(hostname, root.RawData))
-                    {
-                        errors = SslPolicyErrors.RemoteCertificateNameMismatch;
-                    }
-                }
+						// Build certificate chain and check for errors
+						if (chain == null || chain.ChainElements.Count == 0)
+						{//no cert at all
+							errors = SslPolicyErrors.RemoteCertificateNotAvailable;
+							goto sslErrorVerify;
+						}
+
+						if (chain.ChainElements.Count == 1)
+						{//no root?
+							errors = SslPolicyErrors.RemoteCertificateChainErrors;
+							goto sslErrorVerify;
+						}
+
+						if (!chain.Build(root))
+						{
+							errors = SslPolicyErrors.RemoteCertificateChainErrors;
+							goto sslErrorVerify;
+						}
+
+						var subject = root.Subject;
+						var subjectCn = cnRegex.Match(subject).Groups[1].Value;
+
+						if (string.IsNullOrWhiteSpace(subjectCn) || !Utility.MatchHostnameToPattern(hostname, subjectCn))
+						{
+							var subjectAn = root.ParseSubjectAlternativeName();
+
+							if (subjectAn.FirstOrDefault(s => Utility.MatchHostnameToPattern(hostname, s)) == null)
+							{
+								errors = SslPolicyErrors.RemoteCertificateNameMismatch;
+								goto sslErrorVerify;
+							}
+						}
+						break;
+					case "PublicKeysOnly":
+
+						if (this.CertificatePinner != null)
+						{
+							if (!this.CertificatePinner.HasPins(hostname))
+							{
+								errors = SslPolicyErrors.RemoteCertificateNameMismatch;
+								goto sslErrorVerify;
+							}
+
+							if (!this.CertificatePinner.Check(hostname, netCerts))
+							{
+								errors = SslPolicyErrors.RemoteCertificateNameMismatch;
+							}
+						}
+						break;
+				}
 
             sslErrorVerify:
                 return errors == SslPolicyErrors.None;
@@ -172,7 +194,10 @@ namespace ModernHttpClient
 
             if (nativeCookieHandler != null)
             {
-                var cookies = nativeCookieHandler.Cookies;
+				var cookies = nativeCookieHandler.Cookies
+												 .Where(c => c.Domain == request.RequestUri.Host)
+												 .Where(c => Utility.PathMatches(request.RequestUri.AbsolutePath, c.Path))
+								                 .ToList(); ;
 
                 if (cookies != null)
                 {

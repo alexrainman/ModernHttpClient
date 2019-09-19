@@ -55,6 +55,8 @@ namespace ModernHttpClient
 
         public readonly TLSConfig TLSConfig;
 
+        public readonly string PinningMode = "CertificateOnly";
+
         public NativeMessageHandler() : this(false, new TLSConfig()) { }
 
         public NativeMessageHandler(bool throwOnCaptiveNetwork, TLSConfig tLSConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
@@ -72,8 +74,11 @@ namespace ModernHttpClient
 
             if (!TLSConfig.DangerousAcceptAnyServerCertificateValidator &&
                 TLSConfig.Pins != null &&
-                TLSConfig.Pins.Count > 0)
+                TLSConfig.Pins.Count > 0 &&
+                TLSConfig.Pins.FirstOrDefault(p => p.PublicKeys.Count() > 0) != null)
             {
+                this.PinningMode = "PublicKeysOnly";
+
                 this.CertificatePinner = new CertificatePinner();
 
                 foreach (var pin in TLSConfig.Pins)
@@ -211,6 +216,7 @@ namespace ModernHttpClient
 
             var cookies = NSHttpCookieStorage.SharedStorage.Cookies
                                              .Where(c => c.Domain == request.RequestUri.Host)
+                                             .Where(c => Utility.PathMatches(request.RequestUri.AbsolutePath, c.Path))
                                              .ToList();
             foreach (var cookie in cookies)
             {
@@ -431,81 +437,90 @@ namespace ModernHttpClient
                         goto sslErrorVerify;
                     }
 
-                    // Convert java certificates to .NET certificates and build cert chain from root certificate
-                    var serverCertChain = challenge.ProtectionSpace.ServerSecTrust;
-                    var chain = new X509Chain();
-                    X509Certificate2 root = null;
-                    
-                    // Build certificate chain and check for errors
-                    if (serverCertChain == null || serverCertChain.Count == 0)
-                    {//no cert at all
-                        errors = SslPolicyErrors.RemoteCertificateNotAvailable;
-                        PinningFailureMessage = FailureMessages.NoCertAtAll;
-                        goto sslErrorVerify;
-                    }
-
-                    if (serverCertChain.Count == 1)
-                    {//no root?
-                        errors = SslPolicyErrors.RemoteCertificateChainErrors;
-                        PinningFailureMessage = FailureMessages.NoRoot;
-                        goto sslErrorVerify;
-                    }
-
-                    var netCerts = Enumerable.Range(0, serverCertChain.Count)
-                        .Select(x => serverCertChain[x].ToX509Certificate2())
-                        .ToArray();
-
-                    for (int i = 1; i < netCerts.Length; i++)
-                    {
-                        chain.ChainPolicy.ExtraStore.Add(netCerts[i]);
-                    }
-
-                    root = netCerts[0];
-
-                    chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
-                    chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
-                    chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
-                    chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
-
-                    if (!chain.Build(root))
-                    {
-                        errors = SslPolicyErrors.RemoteCertificateChainErrors;
-                        PinningFailureMessage = FailureMessages.ChainError;
-                        goto sslErrorVerify;
-                    }
-
                     var hostname = task.CurrentRequest.Url.Host;
 
-                    var subject = root.Subject;
-                    var subjectCn = cnRegex.Match(subject).Groups[1].Value;
+                    // Convert java certificates to .NET certificates and build cert chain from root certificate
+                    var serverCertChain = challenge.ProtectionSpace.ServerSecTrust;
 
-                    if (string.IsNullOrWhiteSpace(subjectCn) || !Utility.MatchHostnameToPattern(hostname, subjectCn))
+                    var netCerts = Enumerable.Range(0, serverCertChain.Count)
+                                .Select(x => serverCertChain[x].ToX509Certificate2())
+                                .ToList();
+
+                    switch (nativeHandler.PinningMode)
                     {
-                        var subjectAn = root.ParseSubjectAlternativeName();
+                        case "CertificateOnly":
 
-                        if (!subjectAn.Contains(hostname))
-                        {
-                            errors = SslPolicyErrors.RemoteCertificateNameMismatch;
-                            PinningFailureMessage = FailureMessages.SubjectNameMismatch;
-                            goto sslErrorVerify;
-                        }
-                    }
+                            var chain = new X509Chain();
+                            X509Certificate2 root = null;
 
-                    if (nativeHandler.CertificatePinner != null)
-                    {
-                        if (!nativeHandler.CertificatePinner.HasPins(hostname))
-                        {
-                            errors = SslPolicyErrors.RemoteCertificateNameMismatch;
-                            PinningFailureMessage = FailureMessages.NoPinsProvided + " " + hostname;
-                            goto sslErrorVerify;
-                        }
+                            // Build certificate chain and check for errors
+                            if (serverCertChain == null || serverCertChain.Count == 0)
+                            {//no cert at all
+                                errors = SslPolicyErrors.RemoteCertificateNotAvailable;
+                                PinningFailureMessage = FailureMessages.NoCertAtAll;
+                                goto sslErrorVerify;
+                            }
 
-                        if (!nativeHandler.CertificatePinner.Check(hostname, root.RawData))
-                        {
-                            errors = SslPolicyErrors.RemoteCertificateNameMismatch;
-                            PinningFailureMessage = FailureMessages.PinMismatch;
-                        }
-                    }
+                            if (serverCertChain.Count == 1)
+                            {//no root?
+                                errors = SslPolicyErrors.RemoteCertificateChainErrors;
+                                PinningFailureMessage = FailureMessages.NoRoot;
+                                goto sslErrorVerify;
+                            }
+
+                            for (int i = 1; i < netCerts.Count; i++)
+                            {
+                                chain.ChainPolicy.ExtraStore.Add(netCerts[i]);
+                            }
+
+                            chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
+                            chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                            chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
+                            chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
+
+                            root = netCerts[0];
+
+                            if (!chain.Build(root))
+                            {
+                                errors = SslPolicyErrors.RemoteCertificateChainErrors;
+                                PinningFailureMessage = FailureMessages.ChainError;
+                                goto sslErrorVerify;
+                            }
+
+                            var subject = root.Subject;
+                            var subjectCn = cnRegex.Match(subject).Groups[1].Value;
+
+                            if (string.IsNullOrWhiteSpace(subjectCn) || !Utility.MatchHostnameToPattern(hostname, subjectCn))
+                            {
+                                var subjectAn = root.ParseSubjectAlternativeName();
+
+                                if (subjectAn.FirstOrDefault(s => Utility.MatchHostnameToPattern(hostname, s)) == null)
+                                {
+                                    errors = SslPolicyErrors.RemoteCertificateNameMismatch;
+                                    PinningFailureMessage = FailureMessages.SubjectNameMismatch;
+                                    goto sslErrorVerify;
+                                }
+                            }
+                            break;
+                        case "PublicKeysOnly":
+
+                            if (nativeHandler.CertificatePinner != null)
+                            {
+                                if (!nativeHandler.CertificatePinner.HasPins(hostname))
+                                {
+                                    errors = SslPolicyErrors.RemoteCertificateNameMismatch;
+                                    PinningFailureMessage = FailureMessages.NoPinsProvided + " " + hostname;
+                                    goto sslErrorVerify;
+                                }
+
+                                if (!nativeHandler.CertificatePinner.Check(hostname, netCerts))
+                                {
+                                    errors = SslPolicyErrors.RemoteCertificateNameMismatch;
+                                    PinningFailureMessage = FailureMessages.PinMismatch;
+                                }
+                            }
+                            break;
+                    } 
 
                 sslErrorVerify:
                     if (errors == SslPolicyErrors.None)

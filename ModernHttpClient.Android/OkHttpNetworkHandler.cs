@@ -9,7 +9,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Android.App;
+using Android.Gms.Security;
 using Android.OS;
+using Android.Security;
 using Java.IO;
 using Java.Net;
 using Java.Security;
@@ -42,6 +45,8 @@ namespace ModernHttpClient
 
         public readonly TLSConfig TLSConfig;
 
+        public readonly string PinningMode = "CertificateOnly";
+
         public NativeMessageHandler() : this(false, new TLSConfig()) { }
 
         public NativeMessageHandler(bool throwOnCaptiveNetwork, TLSConfig tLSConfig, NativeCookieHandler cookieHandler = null, IWebProxy proxy = null)
@@ -57,7 +62,7 @@ namespace ModernHttpClient
 
             var specs = new List<ConnectionSpec>() { tlsSpec };
 
-            if (TLSConfig.DangerousAllowInsecureHTTPLoads)
+            if (Build.VERSION.SdkInt < BuildVersionCodes.Lollipop || NetworkSecurityPolicy.Instance.IsCleartextTrafficPermitted)
             {
                 specs.Add(ConnectionSpec.Cleartext);
             }
@@ -68,8 +73,11 @@ namespace ModernHttpClient
             // Add Certificate Pins
             if (!TLSConfig.DangerousAcceptAnyServerCertificateValidator &&
                 TLSConfig.Pins != null &&
-                TLSConfig.Pins.Count > 0)
+                TLSConfig.Pins.Count > 0 &&
+                TLSConfig.Pins.FirstOrDefault(p => p.PublicKeys.Count() > 0) != null)
             {
+                this.PinningMode = "PublicKeysOnly";
+
                 this.CertificatePinner = new CertificatePinner();
 
                 foreach (var pin in TLSConfig.Pins)
@@ -120,7 +128,8 @@ namespace ModernHttpClient
                 if (Build.VERSION.SdkInt < BuildVersionCodes.Lollipop)
                 {
                     // Support TLS1.2 on Android versions before Lollipop
-                    clientBuilder.SslSocketFactory(new TlsSslSocketFactory(KeyManagers, null), TlsSslSocketFactory.GetSystemDefaultTrustManager());
+                    ProviderInstaller.InstallIfNeeded(Application.Context); // To enable TLS
+                    clientBuilder.SslSocketFactory(new TlsSslSocketFactory(), TlsSslSocketFactory.GetSystemDefaultTrustManager());
                 }
                 else
                 {
@@ -426,69 +435,78 @@ namespace ModernHttpClient
 
             // Convert java certificates to .NET certificates and build cert chain from root certificate
             var serverCertChain = session.GetPeerCertificateChain();
-            var chain = new X509Chain();
-            X509Certificate2 root = null;
-            
-            // Build certificate chain and check for errors
-            if (serverCertChain == null || serverCertChain.Length == 0)
-            {//no cert at all
-                errors = SslPolicyErrors.RemoteCertificateNotAvailable;
-                PinningFailureMessage = FailureMessages.NoCertAtAll;
-                goto sslErrorVerify;
-            }
 
-            if (serverCertChain.Length == 1)
-            {//no root?
-                errors = SslPolicyErrors.RemoteCertificateChainErrors;
-                PinningFailureMessage = FailureMessages.NoRoot;
-                goto sslErrorVerify;
-            }
+            var netCerts = serverCertChain.Select(x => new X509Certificate2(x.GetEncoded())).ToList();
 
-            var netCerts = serverCertChain.Select(x => new X509Certificate2(x.GetEncoded())).ToArray();
-
-            for (int i = 1; i < netCerts.Length; i++)
+            switch (nativeHandler.PinningMode)
             {
-                chain.ChainPolicy.ExtraStore.Add(netCerts[i]);
-            }
+                case "CertificateOnly":
+                    
+                    var chain = new X509Chain();
+                    X509Certificate2 root = null;
 
-            root = netCerts[0];
+                    // Build certificate chain and check for errors
+                    if (serverCertChain == null || serverCertChain.Length == 0)
+                    {//no cert at all
+                        errors = SslPolicyErrors.RemoteCertificateNotAvailable;
+                        PinningFailureMessage = FailureMessages.NoCertAtAll;
+                        goto sslErrorVerify;
+                    }
 
-            chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
-            chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
-            chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
-            chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
+                    if (serverCertChain.Length == 1)
+                    {//no root?
+                        errors = SslPolicyErrors.RemoteCertificateChainErrors;
+                        PinningFailureMessage = FailureMessages.NoRoot;
+                        goto sslErrorVerify;
+                    }
 
-            if (!chain.Build(root))
-            {
-                errors = SslPolicyErrors.RemoteCertificateChainErrors;
-                PinningFailureMessage = FailureMessages.ChainError;
-                goto sslErrorVerify;
-            }
+                    for (int i = 1; i < netCerts.Count; i++)
+                    {
+                        chain.ChainPolicy.ExtraStore.Add(netCerts[i]);
+                    }
 
-            var subject = root.Subject;
-            var subjectCn = cnRegex.Match(subject).Groups[1].Value;
+                    chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
+                    chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                    chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
+                    chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
 
-            if (string.IsNullOrWhiteSpace(subjectCn) || !Utility.MatchHostnameToPattern(hostname, subjectCn))
-            {
-                var subjectAn = root.ParseSubjectAlternativeName();
+                    root = netCerts[0];
 
-                if (!subjectAn.Contains(hostname))
-                {
-                    errors = SslPolicyErrors.RemoteCertificateNameMismatch;
-                    PinningFailureMessage = FailureMessages.SubjectNameMismatch;
-                    goto sslErrorVerify;
-                }
-            }
+                    if (!chain.Build(root))
+                    {
+                        errors = SslPolicyErrors.RemoteCertificateChainErrors;
+                        PinningFailureMessage = FailureMessages.ChainError;
+                        goto sslErrorVerify;
+                    }
 
-            if (nativeHandler.CertificatePinner != null)
-            {
-                if (!nativeHandler.CertificatePinner.HasPins(hostname))
-                {
-                    errors = SslPolicyErrors.RemoteCertificateNameMismatch;
-                    PinningFailureMessage = FailureMessages.NoPinsProvided + " " + hostname;
-                }
+                    var subject = root.Subject;
+                    var subjectCn = cnRegex.Match(subject).Groups[1].Value;
 
-                // CertificatePinner.Check will be done by Square.OkHttp3.CertificatePinner
+                    if (string.IsNullOrWhiteSpace(subjectCn) || !Utility.MatchHostnameToPattern(hostname, subjectCn))
+                    {
+                        var subjectAn = root.ParseSubjectAlternativeName();
+
+                        if (subjectAn.FirstOrDefault(s => Utility.MatchHostnameToPattern(hostname, s)) == null)
+                        {
+                            errors = SslPolicyErrors.RemoteCertificateNameMismatch;
+                            PinningFailureMessage = FailureMessages.SubjectNameMismatch;
+                            goto sslErrorVerify;
+                        }
+                    }
+                    break;
+                case "PublicKeysOnly":
+
+                    if (nativeHandler.CertificatePinner != null)
+                    {
+                        if (!nativeHandler.CertificatePinner.HasPins(hostname))
+                        {
+                            errors = SslPolicyErrors.RemoteCertificateNameMismatch;
+                            PinningFailureMessage = FailureMessages.NoPinsProvided + " " + hostname;
+                        }
+
+                        // CertificatePinner.Check will be done by Square.OkHttp3.CertificatePinner
+                    }
+                    break;
             }
 
         sslErrorVerify:

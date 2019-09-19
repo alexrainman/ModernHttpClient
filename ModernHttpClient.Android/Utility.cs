@@ -13,11 +13,7 @@ namespace ModernHttpClient
             if (index == -1)
             {
                 // not a pattern, do a direct case-insensitive comparison
-#if WINDOWS_UWP
                 return (string.Compare(hostname, pattern, StringComparison.OrdinalIgnoreCase) == 0);
-#else
-                return (string.Compare(hostname, pattern, true, CultureInfo.InvariantCulture) == 0);
-#endif
             }
 
             // check pattern validity
@@ -43,17 +39,9 @@ namespace ModernHttpClient
             // no point to check a pattern that is longer than the hostname
             if (length <= 0) return false;
 
-#if WINDOWS_UWP
-            if (string.Compare(hostname, length, end, 0, end.Length, StringComparison.OrdinalIgnoreCase) != 0)
-            {
+            if (string.Compare(hostname, length, end, 0, end.Length, StringComparison.OrdinalIgnoreCase) != 0) {
                 return false;
             }
-#else
-
-            if (string.Compare(hostname, length, end, 0, end.Length, true, CultureInfo.InvariantCulture) != 0) {
-                return false;
-            }
-#endif
 
             // special case, we start with the wildcard
             if (index == 0)
@@ -66,11 +54,21 @@ namespace ModernHttpClient
             // match the start of the pattern
             string start = pattern.Substring(0, index);
 
-#if WINDOWS_UWP
             return (string.Compare(hostname, 0, start, 0, start.Length, StringComparison.OrdinalIgnoreCase) == 0);
-#else
-            return (string.Compare(hostname, 0, start, 0, start.Length, true, CultureInfo.InvariantCulture) == 0);
-#endif
+        }
+
+        public static bool PathMatches(string path, string cookiePath) //per update 6265 rules
+        {
+            if (path == cookiePath)
+                return true;
+            if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(cookiePath))
+                return false;
+            if (path.StartsWith(cookiePath, StringComparison.InvariantCultureIgnoreCase) && cookiePath.EndsWith("/", StringComparison.InvariantCultureIgnoreCase))
+                return true;
+            if (path.StartsWith(cookiePath, StringComparison.InvariantCultureIgnoreCase) && path.Substring(cookiePath.Length).StartsWith("/", StringComparison.InvariantCultureIgnoreCase))
+                return true;
+
+            return false;
         }
 
         public static void VerifyPins(string[] pins)

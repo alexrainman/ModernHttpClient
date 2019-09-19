@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 
 namespace ModernHttpClient
 {
@@ -34,7 +35,7 @@ namespace ModernHttpClient
             Pins[hostname] = pins;
         }
 
-        public bool Check(string hostname, byte[] certificate)
+        public bool Check(string hostname, List<X509Certificate2> peerCertificates)
         {
             if (!HasPins(hostname))
             {
@@ -53,22 +54,21 @@ namespace ModernHttpClient
                 return true;
             }
 
-            // Compute spki fingerprint
-            var spkiFingerprint = SpkiFingerprint.Compute(certificate);
-
-            // Check pin
-            var match = Array.IndexOf(pins, spkiFingerprint) > -1;
-
-            if (match)
+            foreach(var certificate in peerCertificates)
             {
-                Debug.WriteLine($"Certificate pin is ok for {hostname}");
-            }
-            else
-            {
-                Debug.WriteLine($"Certificate pinning failure! Peer certificate chain: {spkiFingerprint}, Pinned certificates for {hostname}: {string.Join("|", pins)}");
+                // Compute spki fingerprint
+                var spkiFingerprint = SpkiFingerprint.Compute(certificate.RawData);
+
+                // Check pin
+                if (Array.IndexOf(pins, spkiFingerprint) > -1)
+                {
+                    Debug.WriteLine($"Certificate pin {spkiFingerprint} is ok for {hostname}");
+                    return true;
+                }
             }
 
-            return match;
+            Debug.WriteLine($"Certificate pinning failure! Peer certificate chain for {hostname}: {string.Join("|", pins)}");
+            return false;
         }
     }
 }

@@ -2,6 +2,7 @@
 using Java.Lang;
 using Java.Security;
 using Javax.Net.Ssl;
+using Square.OkHttp3;
 
 namespace ModernHttpClient
 {
