@@ -23,8 +23,6 @@ Introducing two pinning modes:
 
 - PublicKeysOnly: used if at least pins for one domain are provided (sha256, sha1 and md5 public keys are supported).
 
-In Android, CLEARTEXT will be enabled by default in pre-Lollipop devices. To enable CLEARTEXT in Lollipop and above, usesCleartextTraffic or networkSecurityConfig is needed.
-
 ### Usage
 
 Use TLSConfig parameter to provide server certificate chain public keys and a client certificate for Mutual TLS Authentication.
