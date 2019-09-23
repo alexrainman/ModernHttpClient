@@ -23,6 +23,24 @@ Introducing two pinning modes:
 
 - PublicKeysOnly: used if at least pins for one domain are provided (sha256, sha1 and md5 public keys are supported).
 
+### Enabling TLS in pre-Lollipop devices
+
+Install Xamarin.GooglePlayServices.SafetyNet and in your MainActivity:
+
+```cs
+if (Build.VERSION.SdkInt < BuildVersionCodes.Lollipop)
+{
+    // Support TLS1.2 on Android versions before Lollipop
+    ProviderInstaller.InstallIfNeeded(Application.Context);
+}
+```
+
+### TLS 1.2+ has been enforced.
+
+Read why here:
+
+https://www.brillianceweb.com/resources/answers-to-7-common-questions-about-upgrading-to-tls-1.2/
+
 ### Usage
 
 Use TLSConfig parameter to provide server certificate chain public keys and a client certificate for Mutual TLS Authentication.
@@ -53,24 +71,6 @@ readonly static HttpClient client = new HttpClient(new NativeMessageHandler(fals
     DisableCaching = true,
     Timeout = new TimeSpan(0, 0, 9)
 });
-```
-
-### TLS 1.2+ has been enforced.
-
-Read why here:
-
-https://www.brillianceweb.com/resources/answers-to-7-common-questions-about-upgrading-to-tls-1.2/
-
-### Enabling TLS in pre-Lollipop devices
-
-Install Xamarin.GooglePlayServices.SafetyNet and in your MainActivity:
-
-```cs
-if (Build.VERSION.SdkInt < BuildVersionCodes.Lollipop)
-{
-    // Support TLS1.2 on Android versions before Lollipop
-    ProviderInstaller.InstallIfNeeded(Application.Context);
-}
 ```
 
 ### Wildcard pattern rules
