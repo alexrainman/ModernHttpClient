@@ -9,8 +9,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Android.App;
-using Android.Gms.Security;
 using Android.OS;
 using Android.Security;
 using Java.IO;
@@ -128,7 +126,6 @@ namespace ModernHttpClient
                 if (Build.VERSION.SdkInt < BuildVersionCodes.Lollipop)
                 {
                     // Support TLS1.2 on Android versions before Lollipop
-                    ProviderInstaller.InstallIfNeeded(Application.Context); // To enable TLS
                     clientBuilder.SslSocketFactory(new TlsSslSocketFactory(), TlsSslSocketFactory.GetSystemDefaultTrustManager());
                 }
                 else

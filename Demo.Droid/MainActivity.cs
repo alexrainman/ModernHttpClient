@@ -1,4 +1,5 @@
 ﻿using Android.App;
+using Android.Gms.Security;
 using Android.OS;
 using Android.Widget;
 using Square.OkHttp3;
@@ -14,6 +15,12 @@ namespace Demo.Droid
 
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.Main);
+
+            if (Build.VERSION.SdkInt < BuildVersionCodes.Lollipop)
+            {
+                // Support TLS1.2 on Android versions before Lollipop
+                ProviderInstaller.InstallIfNeeded(Application.Context);
+            }
 
             var vm = new MainViewModel();
 

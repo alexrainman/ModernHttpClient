@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <version>3.4.1</version>
+    <version>3.4.2</version>
     <authors>Alex Rainman</authors>
     <owners>Alex Rainman</owners>
     <licenseUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/LICENSE</licenseUrl>
@@ -14,19 +14,16 @@
     <copyright>Copyright Alex Rainman © 2019</copyright>
     <iconUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/download.png</iconUrl>
     <releaseNotes>
-3.4.1
-[Update] Supporting public keys in sha256, sha1 and md5 formats
-3.4.0
+3.4.2
 [Android] Deprecating DangerousAllowInsecureHTTPLoads
-[Android] Enabling TLS in pre-Lollipop
-[Android] CLEARTEXT will be enabled by default in pre-Lollipop
-[Android] To enable CLEARTEXT in Lollipop and above, usesCleartextTraffic or networkSecurityConfig are needed
+[Android] CLEARTEXT enabled by default in pre-Lollipop
 [Update] Refactoring CertificatePinner to match Android OkHttp
 [Update] Adding CertificateOnly and PublicKeysOnly pinning modes
 [Update] Default pinning mode set to CertificateOnly
 [Update] Pinning mode set to PublicKeysOnly if at least pins for one domain are provided
 [Update] MatchHostnameToPattern applied to all alternative names when validating hostname
 [Update] Performing cookie path-checking before adding them to the cookie collection (PR by @phdonnelly)
+[Update] Supporting public keys in sha256, sha1 and md5 formats
 3.3.4
 [Update] Skip pinning for specific domain with empty pins array
 [Update] Validating pins and client certificate base64 string
@@ -95,7 +92,6 @@ Adding Timeout property
     <dependencies>
       <group targetFramework="MonoAndroid">
         <dependency id="Square.OkHttp3" version="3.8.1" />
-        <dependency id="Xamarin.GooglePlayServices.SafetyNet" version="60.1142.1" />
       </group>
       <group targetFramework="Xamarin.iOS10">
         <dependency id="Portable.BouncyCastle" version="1.8.5" />

@@ -25,8 +25,6 @@ Introducing two pinning modes:
 
 In Android, CLEARTEXT will be enabled by default in pre-Lollipop devices. To enable CLEARTEXT in Lollipop and above, usesCleartextTraffic or networkSecurityConfig is needed.
 
-Enabling TLS in pre-Lollipop devices.
-
 ### Usage
 
 Use TLSConfig parameter to provide server certificate chain public keys and a client certificate for Mutual TLS Authentication.
@@ -59,13 +57,25 @@ readonly static HttpClient client = new HttpClient(new NativeMessageHandler(fals
 });
 ```
 
-TLS 1.2+ has been enforced.
+### TLS 1.2+ has been enforced.
 
 Read why here:
 
 https://www.brillianceweb.com/resources/answers-to-7-common-questions-about-upgrading-to-tls-1.2/
 
-### Wildcard pattern rules:
+### Enabling TLS in pre-Lollipop devices
+
+Install Xamarin.GooglePlayServices.SafetyNet and in your MainActivity:
+
+```cs
+if (Build.VERSION.SdkInt < BuildVersionCodes.Lollipop)
+{
+    // Support TLS1.2 on Android versions before Lollipop
+    ProviderInstaller.InstallIfNeeded(Application.Context);
+}
+```
+
+### Wildcard pattern rules
 
 - Asterisk * is only permitted in the left-most domain name label and must be the only character in that label (i.e., must match the whole left-most label).
 
@@ -352,19 +362,11 @@ Note: better use a secure network traffic rather than cleartext.
 
 #### Release Notes
 
-3.4.1
-
-[Update] Supporting public keys in sha256, sha1 and md5 formats
-
-3.4.0
+3.4.2
 
 [Android] Deprecating DangerousAllowInsecureHTTPLoads
 
-[Android] Enabling TLS in pre-Lollipop
-
-[Android] CLEARTEXT will be enabled by default in pre-Lollipop
-
-[Android] To enable CLEARTEXT in Lollipop and above, usesCleartextTraffic or networkSecurityConfig is needed
+[Android] CLEARTEXT enabled by default in pre-Lollipop
 
 [Update] Refactoring CertificatePinner to match Android OkHttp
 
@@ -374,9 +376,11 @@ Note: better use a secure network traffic rather than cleartext.
 
 [Update] Pinning mode set to PublicKeysOnly if at least pins for one domain are provided
 
-[Update] MatchHostnameToPattern applied to all alternative names when validating hostname (Tip by Logan2014)
+[Update] MatchHostnameToPattern applied to all alternative names when validating hostname
 
 [Update] Performing cookie path-checking before adding them to the cookie collection (PR by @phdonnelly)
+
+[Update] Supporting public keys in sha256, sha1 and md5 formats
 
 3.3.4
 
