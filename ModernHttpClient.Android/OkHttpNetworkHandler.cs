@@ -60,7 +60,7 @@ namespace ModernHttpClient
 
             var specs = new List<ConnectionSpec>() { tlsSpec };
 
-            if (Build.VERSION.SdkInt < BuildVersionCodes.Lollipop || NetworkSecurityPolicy.Instance.IsCleartextTrafficPermitted)
+            if (Build.VERSION.SdkInt < BuildVersionCodes.M || NetworkSecurityPolicy.Instance.IsCleartextTrafficPermitted)
             {
                 specs.Add(ConnectionSpec.Cleartext);
             }
