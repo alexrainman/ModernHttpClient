@@ -65,8 +65,8 @@ namespace ModernHttpClient
                 specs.Add(ConnectionSpec.Cleartext);
             }
 
-            clientBuilder.ConnectionSpecs(specs);
-            clientBuilder.Protocols(new[] { Protocol.Http11 }); // Required to avoid stream was reset: PROTOCOL_ERROR
+            clientBuilder.ConnectionSpecs(specs);            
+            clientBuilder.Protocols(new[] { Protocol.Http11, Protocol.Http2 }); // Required to avoid stream was reset: PROTOCOL_ERROR
 
             // Add Certificate Pins
             if (!TLSConfig.DangerousAcceptAnyServerCertificateValidator &&

@@ -33,9 +33,22 @@ namespace Demo
             Timeout = new TimeSpan(0, 0, 9)
         });
 
+        readonly HttpClient clientHttp2 = new HttpClient(new NativeMessageHandler()
+        {
+            DisableCaching = true,
+            Timeout = new TimeSpan(0, 0, 9)
+        });
+
         public async Task Get()
         {
             var response = await client.GetAsync(new Uri("https://gorest.co.in/public-api/users?_format=json&access-token=ZpvESa-uwxDolSDuCdONfCBnq1NU1nCKkP5z")); //https://self-signed.badssl.com
+
+            Debug.WriteLine(response.Content);
+        }
+
+        public async Task GetHttp2()
+        {
+            var response = await clientHttp2.GetAsync(new Uri("https://http2.akamai.com/"));
 
             Debug.WriteLine(response.Content);
         }
