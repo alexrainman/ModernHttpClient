@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <version>3.4.2</version>
+    <version>3.4.3</version>
     <authors>Alex Rainman</authors>
     <owners>Alex Rainman</owners>
-    <licenseUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/LICENSE</licenseUrl>
+    <license type="expression">MIT</license>
     <projectUrl>https://github.com/alexrainman/ModernHttpClient</projectUrl>
     <id>modernhttpclient-updated</id>
     <title>ModernHttpClient</title>
@@ -14,6 +14,13 @@
     <copyright>Copyright Alex Rainman © 2019</copyright>
     <iconUrl>https://github.com/alexrainman/ModernHttpClient/blob/master/download.png</iconUrl>
     <releaseNotes>
+3.4.3
+[Android] Updating to OkHttp3 3.12.6
+[Android] Didn't find class "android.security.NetworkSecurityPolicy" on path: DexPathList bug #57
+[Android] VerifyPins() fails for SHA1 and MD5 pins bug #58
+[Android] Http2 support PR #63
+[Android] Fix for #57 on android 5.0 application crashes PR #61
+[iOS] Removing support for MD5 pins as it is not supported in Android OkHttp
 3.4.2
 [Android] Deprecating DangerousAllowInsecureHTTPLoads
 [Android] CLEARTEXT enabled by default in pre-Lollipop
@@ -91,7 +98,7 @@ Adding Timeout property
         </releaseNotes>
     <dependencies>
       <group targetFramework="MonoAndroid">
-        <dependency id="Square.OkHttp3" version="3.8.1" />
+        <dependency id="Square.OkHttp3" version="3.12.6" />
       </group>
       <group targetFramework="Xamarin.iOS10">
         <dependency id="Portable.BouncyCastle" version="1.8.5" />

@@ -75,16 +75,6 @@ namespace ModernHttpClient
                     Debug.WriteLine($"Certificate pin {sha1Fingerprint} is ok for {hostname}");
                     return true;
                 }
-
-                // Compute md5
-                var md5Fingerprint = SpkiFingerprint.ComputeMD5(certificate.RawData);
-
-                // Check pins for md5
-                if (Array.IndexOf(pins, md5Fingerprint) > -1)
-                {
-                    Debug.WriteLine($"Certificate pin {md5Fingerprint} is ok for {hostname}");
-                    return true;
-                }
             }
 
             Debug.WriteLine($"Certificate pinning failure! Peer certificate chain for {hostname}: {string.Join("|", pins)}");

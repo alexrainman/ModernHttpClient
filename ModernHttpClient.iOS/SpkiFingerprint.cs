@@ -50,27 +50,5 @@ namespace ModernHttpClient
 
             return $"sha1/{spkiFingerprint}";
         }
-
-        public static string ComputeMD5(byte[] certificate)
-        {
-            // Load ASN.1 encoded certificate structure
-            var certAsn1 = Asn1Object.FromByteArray(certificate);
-            var certStruct = X509CertificateStructure.GetInstance(certAsn1);
-
-            // Extract SPKI and DER-encode it
-            var spki = certStruct.SubjectPublicKeyInfo;
-            var spkiDer = spki.GetDerEncoded();
-
-            // Compute spki fingerprint (md5)
-            string spkiFingerprint;
-
-            using (var digester = MD5.Create())
-            {
-                var digest = digester.ComputeHash(spkiDer);
-                spkiFingerprint = Convert.ToBase64String(digest);
-            }
-
-            return $"md5/{spkiFingerprint}";
-        }
     }
 }
