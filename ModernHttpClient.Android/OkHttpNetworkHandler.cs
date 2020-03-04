@@ -373,8 +373,10 @@ namespace ModernHttpClient
 
             public void OnFailure(ICall p0, IOException p1)
             {
+                var host = p0?.Request()?.Url()?.Host();
+
                 // Kind of a hack, but the simplest way to find out that server cert. validation failed
-                if (p1.Message.StartsWith("Hostname " + p0.Request().Url().Host() + " not verified", StringComparison.Ordinal))
+                if (host != null && p1.Message != null && p1.Message.StartsWith("Hostname " + host + " not verified", StringComparison.Ordinal))
                 {
                     // SIGABRT after UnknownHostException #229
                     //tcs.TrySetException(new WebException(p1.Message));
@@ -383,7 +385,7 @@ namespace ModernHttpClient
                     HostnameVerifier.PinningFailureMessage = null;
                     tcs.TrySetException(ex);
                 }
-                else if (p1.Message.StartsWith("Certificate pinning failure", StringComparison.Ordinal))
+                else if (p1.Message != null && p1.Message.StartsWith("Certificate pinning failure", StringComparison.Ordinal))
                 {
                     System.Diagnostics.Debug.WriteLine(p1.Message);
                     tcs.TrySetException(new System.OperationCanceledException(FailureMessages.PinMismatch, p1));
