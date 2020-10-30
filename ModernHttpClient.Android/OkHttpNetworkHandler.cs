@@ -219,7 +219,7 @@ namespace ModernHttpClient
                 {
                     contentType = string.Join(" ", request.Content.Headers.GetValues("Content-Type"));
                 }
-                body = RequestBody.Create(MediaType.Parse(contentType), bytes);
+                body = RequestBody.Create(bytes, MediaType.Parse(contentType));
             }
 
             var requestBuilder = new Request.Builder()
@@ -373,8 +373,12 @@ namespace ModernHttpClient
 
             public void OnFailure(ICall p0, IOException p1)
             {
+                // https://github.com/alexrainman/ModernHttpClient/pull/65
+                var host = p0?.Request()?.Url()?.Host();
+
                 // Kind of a hack, but the simplest way to find out that server cert. validation failed
-                if (p1.Message.StartsWith("Hostname " + p0.Request().Url().Host() + " not verified", StringComparison.Ordinal))
+                //if (p1.Message.StartsWith("Hostname " + p0.Request().Url().Host() + " not verified", StringComparison.Ordinal))
+                if (host != null && p1.Message != null && p1.Message.StartsWith("Hostname " + host + " not verified", StringComparison.Ordinal))
                 {
                     // SIGABRT after UnknownHostException #229
                     //tcs.TrySetException(new WebException(p1.Message));
@@ -383,7 +387,8 @@ namespace ModernHttpClient
                     HostnameVerifier.PinningFailureMessage = null;
                     tcs.TrySetException(ex);
                 }
-                else if (p1.Message.StartsWith("Certificate pinning failure", StringComparison.Ordinal))
+                //else if (p1.Message.StartsWith("Certificate pinning failure", StringComparison.Ordinal))
+                else if (p1.Message != null && p1.Message.StartsWith("Certificate pinning failure", StringComparison.Ordinal))
                 {
                     System.Diagnostics.Debug.WriteLine(p1.Message);
                     tcs.TrySetException(new System.OperationCanceledException(FailureMessages.PinMismatch, p1));
@@ -462,19 +467,20 @@ namespace ModernHttpClient
                         chain.ChainPolicy.ExtraStore.Add(netCerts[i]);
                     }
 
+                    //chain.ChainPolicy.CertificatePolicy.Add(new Oid("1.2.840.10045.2.1"));
                     chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
                     chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
                     chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
-                    chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
+                    chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;      
 
                     root = netCerts[0];
 
-                    if (!chain.Build(root))
+                    /*if (!chain.Build(root))
                     {
                         errors = SslPolicyErrors.RemoteCertificateChainErrors;
                         PinningFailureMessage = FailureMessages.ChainError;
                         goto sslErrorVerify;
-                    }
+                    }*/
 
                     var subject = root.Subject;
                     var subjectCn = cnRegex.Match(subject).Groups[1].Value;

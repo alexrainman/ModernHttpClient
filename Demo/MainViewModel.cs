@@ -15,7 +15,7 @@ namespace Demo
         {
             Pins = new List<Pin>()
             {
-                new Pin()
+                /*new Pin()
                 {
                     Hostname = "*.co.in",
                     PublicKeys = new string []
@@ -24,7 +24,15 @@ namespace Demo
                         "sha256/YLh1dUR9y6Kja30RrAn7JKnbQG/uEtLMkBgFF2Fuihg=",
                         "sha256/Vjs8r4z+80wjNcr1YKepWQboSIRi63WsWXhIMN+eWys="
                     }
-                }
+                },
+                new Pin()
+                {
+                    Hostname = "restcountries.eu",
+                    PublicKeys = new string []
+                    {
+                        "sha256/wxgZ6Jx5WaNt5zAgUSDnLsK8E5uy+DUumAogHk4P7R8="
+                    }
+                }*/
             },
             DangerousAcceptAnyServerCertificateValidator = false
         })
@@ -35,7 +43,7 @@ namespace Demo
 
         public async Task Get()
         {
-            var response = await client.GetAsync(new Uri("https://gorest.co.in/public-api/users?_format=json&access-token=ZpvESa-uwxDolSDuCdONfCBnq1NU1nCKkP5z")); //https://self-signed.badssl.com
+            var response = await client.GetAsync(new Uri("https://restcountries.eu/data/ala.svg"));
 
             Debug.WriteLine(response.Content);
         }

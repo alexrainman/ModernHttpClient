@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 using Foundation;
 using ModernHttpClient.CoreFoundation;
 using ModernHttpClient.Foundation;
-using ObjCRuntime;
 using Security;
 
 namespace ModernHttpClient
@@ -450,6 +449,9 @@ namespace ModernHttpClient
                     {
                         case "CertificateOnly":
 
+                            //Security.addProvider(new BouncyCastleProvider());
+                            //CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+
                             var chain = new X509Chain();
                             X509Certificate2 root = null;
 
@@ -473,6 +475,7 @@ namespace ModernHttpClient
                                 chain.ChainPolicy.ExtraStore.Add(netCerts[i]);
                             }
 
+                            //chain.ChainPolicy.CertificatePolicy.Add(new Oid("1.2.840.10045.2.1"));
                             chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
                             chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
                             chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
@@ -480,12 +483,12 @@ namespace ModernHttpClient
 
                             root = netCerts[0];
 
-                            if (!chain.Build(root))
+                            /*if (!chain.Build(root))
                             {
                                 errors = SslPolicyErrors.RemoteCertificateChainErrors;
                                 PinningFailureMessage = FailureMessages.ChainError;
                                 goto sslErrorVerify;
-                            }
+                            }*/
 
                             var subject = root.Subject;
                             var subjectCn = cnRegex.Match(subject).Groups[1].Value;

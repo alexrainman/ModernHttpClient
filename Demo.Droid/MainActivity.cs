@@ -1,8 +1,8 @@
 ﻿using Android.App;
-using Android.Gms.Security;
+//using Android.Gms.Security;
 using Android.OS;
 using Android.Widget;
-using Square.OkHttp3;
+//using Square.OkHttp3;
 
 namespace Demo.Droid
 {
@@ -16,11 +16,11 @@ namespace Demo.Droid
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.Main);
 
-            if (Build.VERSION.SdkInt < BuildVersionCodes.Lollipop)
-            {
+            //if (Build.VERSION.SdkInt < BuildVersionCodes.Lollipop)
+            //{
                 // Support TLS1.2 on Android versions before Lollipop
-                ProviderInstaller.InstallIfNeeded(Application.Context);
-            }
+                //ProviderInstaller.InstallIfNeeded(Application.Context);
+            //}
 
             var vm = new MainViewModel();
 
@@ -31,7 +31,7 @@ namespace Demo.Droid
                 // The easiest way to pin a host is turn on pinning with a broken configuration and read the expected configuration when the connection fails.
                 // Be sure to do this on a trusted network, and without man -in-the - middle tools like Charles or Fiddler.
 
-                /*var hostname = "gorest.co.in";
+                /*var hostname = "restcountries.eu";
 
                 var certificatePinner = new Square.OkHttp3.CertificatePinner.Builder()
                     .Add(hostname, "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
